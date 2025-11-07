@@ -1,0 +1,27 @@
+/* Light Theme Variables */
+:root[data-theme="light"] {
+  --bg-primary: #f9fafb;
+  --bg-secondary: #ffffff;
+  --text-primary: #374151;
+  --text-secondary: #4b5563;
+  --border-color: #e5e7eb;
+  --accent-color: #4f46e5;
+  --accent-hover: #4338ca;
+  --drop-zone-bg: #ffffff;
+  --drop-zone-border: #d1d5db;
+  --drop-zone-hover: #f9fafb;
+  --drop-zone-drag-over: #f0f9ff;
+  --toc-bg: #ffffff;
+  --toc-item-color: #4b5563;
+  --toc-item-hover: #4f46e5;
+  --toc-item-hover-bg: #f9fafb;
+  --toc-item-active: #4f46e5;
+  --toc-item-active-bg: #eef2ff;
+  --button-bg: #4f46e5;
+  --button-hover: #4338ca;
+  --reader-content-bg: #ffffff;
+  --reader-content-color: #374151;
+  --scrollbar-track: #f1f5f9;
+  --scrollbar-thumb: #cbd5e1;
+  --scrollbar-thumb-hover: #64748b;
+}

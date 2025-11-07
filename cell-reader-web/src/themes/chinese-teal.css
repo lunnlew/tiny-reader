@@ -1,0 +1,27 @@
+/* 中国青绿主题 Variables */
+:root[data-theme="chinese-teal"] {
+  --bg-primary: #f0fdfa;
+  --bg-secondary: #ecfdf5;
+  --text-primary: #0f766e;
+  --text-secondary: #115e59;
+  --border-color: #a7f3d0;
+  --accent-color: #10b981;
+  --accent-hover: #059669;
+  --drop-zone-bg: #ecfdf5;
+  --drop-zone-border: #a7f3d0;
+  --drop-zone-hover: #d1fae5;
+  --drop-zone-drag-over: #a7f3d0;
+  --toc-bg: #ecfdf5;
+  --toc-item-color: #115e59;
+  --toc-item-hover: #10b981;
+  --toc-item-hover-bg: #d1fae5;
+  --toc-item-active: #10b981;
+  --toc-item-active-bg: #a7f3d0;
+  --button-bg: #10b981;
+  --button-hover: #059669;
+  --reader-content-bg: #f0fdfa;
+  --reader-content-color: #0f766e;
+  --scrollbar-track: #d1fae5;
+  --scrollbar-thumb: #a7f3d0;
+  --scrollbar-thumb-hover: #6ee7b7;
+}

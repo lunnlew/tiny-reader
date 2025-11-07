@@ -1,0 +1,342 @@
+import { defineStore } from 'pinia'
+import { decodeTextWithDetection } from '@/utils/encoding'
+import {
+  DB_NAME,
+  DB_VERSION,
+  OBJECT_STORE_NAME,
+  CACHED_TOC_KEY,
+  CACHED_CHAPTER_INDEX_KEY,
+  CACHED_FILE_ID_KEY,
+} from '@/constants'
+
+export const useReaderStore = defineStore('reader', {
+  state: () => ({
+    currentChapterContent: '',
+    toc: [],
+    isLoading: false,
+    currentChapterIndex: 0,
+    fileRef: null,
+    hasCachedFile: false,
+    showLargeFileNotification: false,
+    wasAutoScrollPausedBySettings: false,
+  }),
+
+  actions: {
+    // ---------------------
+    // IndexedDB 初始化
+    // ---------------------
+    async initDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION)
+        request.onerror = () => reject(request.error)
+        request.onsuccess = () => resolve(request.result)
+        request.onupgradeneeded = (e) => {
+          const db = e.target.result
+          if (!db.objectStoreNames.contains(OBJECT_STORE_NAME)) {
+            const store = db.createObjectStore(OBJECT_STORE_NAME, { keyPath: 'id' })
+            store.createIndex('fileId', 'fileId', { unique: true })
+          }
+        }
+      })
+    },
+
+    async saveToIndexedDB(fileId, data) {
+      const db = await this.initDB()
+      const tx = db.transaction([OBJECT_STORE_NAME], 'readwrite')
+      const store = tx.objectStore(OBJECT_STORE_NAME)
+      await store.put({ id: fileId, ...data, timestamp: Date.now() })
+      return tx.complete
+    },
+
+    async loadFromIndexedDB(fileId) {
+      const db = await this.initDB()
+      const tx = db.transaction([OBJECT_STORE_NAME], 'readonly')
+      const store = tx.objectStore(OBJECT_STORE_NAME)
+      return new Promise((resolve, reject) => {
+        const req = store.get(fileId)
+        req.onsuccess = () => resolve(req.result || null)
+        req.onerror = () => reject(req.error)
+      })
+    },
+
+    async deleteFromIndexedDB(fileId) {
+      const db = await this.initDB()
+      const tx = db.transaction([OBJECT_STORE_NAME], 'readwrite')
+      const store = tx.objectStore(OBJECT_STORE_NAME)
+      store.delete(fileId)
+      return tx.complete
+    },
+
+    generateFileId(file) {
+      return `${file.name}_${file.size}_${file.lastModified}`
+    },
+
+    // ---------------------
+    // 提取章节位置
+    // ---------------------
+    extractChapterPositions(fullContent, toc) {
+      const positions = []
+
+      for (let i = 0; i < toc.length; i++) {
+        const chapter = toc[i]
+        
+        // Find the exact position of the chapter title in the content
+        let start = fullContent.indexOf(chapter.title, chapter.offset || 0)
+        // If not found at expected position, try to find it from the beginning
+        if (start === -1) {
+          start = fullContent.indexOf(chapter.title)
+        }
+        // If still not found, use the original offset
+        if (start === -1) {
+          start = chapter.offset || 0
+        }
+
+        let end
+        if (i < toc.length - 1) {
+          // Find the start of the next chapter to determine the end position
+          let nextStart = fullContent.indexOf(toc[i + 1].title, start + chapter.title.length)
+          // If not found, try to find it from the beginning
+          if (nextStart === -1) {
+            nextStart = fullContent.indexOf(toc[i + 1].title)
+          }
+          
+          // If still not found, use the full content length
+          end = nextStart !== -1 ? nextStart : fullContent.length
+        } else {
+          end = fullContent.length
+        }
+
+        positions.push({ index: i, start, end, title: chapter.title })
+      }
+
+      return positions
+    },
+
+    // ---------------------
+    // 缓存加载（刷新恢复）
+    // ---------------------
+    async loadFromCache() {
+      const fileId = localStorage.getItem(CACHED_FILE_ID_KEY)
+      const tocJson = localStorage.getItem(CACHED_TOC_KEY)
+      const index = Number(localStorage.getItem(CACHED_CHAPTER_INDEX_KEY) || 0)
+
+      if (tocJson) this.toc = JSON.parse(tocJson)
+      this.currentChapterIndex = index
+
+      if (fileId) {
+        const cachedData = await this.loadFromIndexedDB(fileId)
+        if (
+          cachedData &&
+          cachedData.fullContent &&
+          Array.isArray(cachedData.chapterPositions) &&
+          Array.isArray(cachedData.toc)
+        ) {
+          this.hasCachedFile = true
+          // 使用缓存初始化章节内容
+          const pos = cachedData.chapterPositions[this.currentChapterIndex]
+          if (pos) {
+            this.currentChapterContent = cachedData.fullContent.slice(pos.start, pos.end)
+          } else if (this.toc.length > 0) {
+            // 如果没有缓存的章节位置但有目录，则加载第一章
+            await this.loadChapter(this.currentChapterIndex)
+          }
+          console.log('[reader] Cache fully loaded from IndexedDB:', fileId)
+        } else {
+          console.warn('[reader] IndexedDB cache invalid or missing full content')
+        }
+      } else if (this.toc.length > 0 && this.currentChapterIndex < this.toc.length) {
+        // 如果没有缓存但有目录，则加载对应章节
+        await this.loadChapter(this.currentChapterIndex)
+      }
+
+      console.log('[reader] loadFromCache done', {
+        tocLength: this.toc.length,
+        currentChapterIndex: this.currentChapterIndex,
+        hasCachedFile: this.hasCachedFile,
+      })
+    },
+
+    saveToCache() {
+      localStorage.setItem(CACHED_TOC_KEY, JSON.stringify(this.toc))
+      localStorage.setItem(CACHED_CHAPTER_INDEX_KEY, String(this.currentChapterIndex))
+    },
+
+    async clearCache() {
+      const fileId = localStorage.getItem(CACHED_FILE_ID_KEY)
+      if (fileId) await this.deleteFromIndexedDB(fileId)
+      localStorage.removeItem(CACHED_TOC_KEY)
+      localStorage.removeItem(CACHED_CHAPTER_INDEX_KEY)
+      localStorage.removeItem(CACHED_FILE_ID_KEY)
+      this.hasCachedFile = false
+    },
+
+    async loadChapterFromCache(index) {
+      const fileId = localStorage.getItem(CACHED_FILE_ID_KEY)
+      if (!fileId) return false
+      const cachedData = await this.loadFromIndexedDB(fileId)
+      if (!cachedData || !cachedData.fullContent) return false
+
+      const pos = cachedData.chapterPositions[index]
+      if (!pos) return false
+
+      this.currentChapterContent = cachedData.fullContent.slice(pos.start, pos.end)
+      this.currentChapterIndex = index
+      this.saveToCache()
+      return true
+    },
+
+    async loadChapter(index) {
+      if (this.hasCachedFile && !this.fileRef) {
+        const ok = await this.loadChapterFromCache(index)
+        if (ok) return
+        console.warn('[reader] Cached file missing or broken')
+      }
+      if (!this.fileRef) {
+        alert('请先加载原始文件')
+        return
+      }
+      await this.loadChapterFromFile(index)
+    },
+
+    async loadChapterFromFile(index) {
+      // First check if we have cached chapter positions for more accurate slicing
+      const fileId = localStorage.getItem(CACHED_FILE_ID_KEY)
+      if (fileId && this.hasCachedFile) {
+        const cachedData = await this.loadFromIndexedDB(fileId)
+        if (cachedData && cachedData.chapterPositions && cachedData.chapterPositions[index]) {
+          const pos = cachedData.chapterPositions[index]
+          // Use cached chapter positions for more accurate content extraction
+          this.currentChapterContent = cachedData.fullContent.slice(pos.start, pos.end)
+          this.currentChapterIndex = index
+          this.saveToCache()
+          return
+        }
+      }
+      
+      // Fallback to the original method if no cached positions are available
+      const toc = this.toc
+      if (!toc.length || !this.fileRef) return
+      const start = toc[index].offset
+      const end = index < toc.length - 1 ? toc[index + 1].offset : this.fileRef.size
+      const slice = this.fileRef.slice(start, end)
+      const buf = await slice.arrayBuffer()
+      const text = decodeTextWithDetection(buf)
+      this.currentChapterContent = text
+      this.currentChapterIndex = index
+      this.saveToCache()
+    },
+
+    async processFile(file) {
+      this.isLoading = true
+      this.fileRef = file
+      await this.clearCache()
+
+      const fileId = this.generateFileId(file)
+      localStorage.setItem(CACHED_FILE_ID_KEY, fileId)
+
+      // 解析 TOC
+      this.toc = await this.parseTocFromFile(file)
+
+      const fullContent = await this.readFullFileContent(file)
+      const chapterPositions = this.extractChapterPositions(fullContent, this.toc)
+
+      await this.saveToIndexedDB(fileId, {
+        fileId,
+        fullContent,
+        toc: JSON.parse(JSON.stringify(this.toc)),
+        chapterPositions,
+        currentChapterIndex: 0,
+      })
+
+      this.hasCachedFile = true
+      this.currentChapterIndex = 0
+      this.saveToCache()
+      
+      // 加载第一章内容而不是首屏内容
+      if (this.toc.length > 0) {
+        await this.loadChapter(0)
+      } else {
+        // 如果没有找到章节，加载前512KB内容
+        const firstChunk = file.slice(0, 512 * 1024)
+        const buf = await firstChunk.arrayBuffer()
+        this.currentChapterContent = decodeTextWithDetection(buf)
+      }
+      
+      this.isLoading = false
+      console.log('[reader] File processed successfully')
+    },
+
+    async readFullFileContent(file) {
+      const buf = await file.arrayBuffer()
+      return decodeTextWithDetection(buf)
+    },
+
+    async parseTocFromFile(file) {
+      // Read the entire file content to get accurate positions
+      const fullContent = await this.readFullFileContent(file)
+      const toc = []
+      
+      // Split content into lines to properly match chapter titles only at the beginning of lines
+      const lines = fullContent.split(/\r?\n/)
+      let contentIndex = 0 // Track the actual index in the full content
+      
+      // Updated regex to include 番外 chapters along with regular chapter patterns
+      // Use alternation with specific ordering to avoid overlapping matches
+      const regex = /(第[一二三四五六七八九十百千万零\d]+[章节]|Chapter\s+\d+|番外[一二三四五六七八九十百千万零\d\s]*篇?|外传|后记|尾声|终章|楔子|序章|引子)/i
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]
+        
+        // Check if line starts with whitespace followed by chapter title
+        const match = regex.exec(line)
+        
+        if (match) {
+          // Only match if the pattern occurs at the beginning of the line or after leading whitespace
+          const leadingWhitespaceMatch = line.match(/^\s*/) // Match leading whitespace
+          const leadingWhitespaceLength = leadingWhitespaceMatch ? leadingWhitespaceMatch[0].length : 0
+          const patternIndex = match.index
+          
+          // The pattern should be at the start of the trimmed line (after leading whitespace)
+          if (patternIndex === leadingWhitespaceLength) {
+            // Only extract from the current line, not beyond
+            const start = contentIndex + patternIndex // Start from the match position
+            // Consider only the rest of the current line for the title
+            const restOfLine = line.substring(patternIndex).trim()
+            
+            // Find end of title within the current line
+            let chapterTitle = match[0]
+            const punctMatches = [...restOfLine.matchAll(/[。！？.!?]/g)]
+            let titleEndIndex = restOfLine.length
+            
+            // Find a reasonable end for the title (punctuation)
+            if (punctMatches.length > 0) {
+              const punctIndex = punctMatches[0].index
+              if (punctIndex > match[0].length) { // Make sure we're not cutting the title too early
+                titleEndIndex = punctIndex + 1
+              }
+            }
+            
+            chapterTitle = restOfLine.substring(0, titleEndIndex).trim()
+            
+            // Avoid adding duplicate titles or very short titles that might be false positives
+            if (chapterTitle.length > match[0].length && !toc.some(item => item.title === chapterTitle)) {
+              toc.push({ title: chapterTitle, offset: start })
+            } else if (chapterTitle.length === match[0].length) {
+              // If the title is just the matched pattern, add it anyway (basic case)
+              toc.push({ title: chapterTitle, offset: start })
+            }
+          }
+        }
+        
+        // Update content index for the next line (including the line break)
+        contentIndex += line.length
+        if (i < lines.length - 1) { // Add newline character except for the last line
+          contentIndex += 1
+        }
+      }
+
+      console.log('[reader] TOC parsed:', toc.length)
+      return toc
+    },
+  },
+})

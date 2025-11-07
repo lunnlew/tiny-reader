@@ -1,0 +1,27 @@
+/* 中国墨色主题 Variables */
+:root[data-theme="chinese-ink"] {
+  --bg-primary: #f8f9fa;
+  --bg-secondary: #e9ecef;
+  --text-primary: #212529;
+  --text-secondary: #495057;
+  --border-color: #ced4da;
+  --accent-color: #495057;
+  --accent-hover: #343a40;
+  --drop-zone-bg: #f8f9fa;
+  --drop-zone-border: #ced4da;
+  --drop-zone-hover: #e9ecef;
+  --drop-zone-drag-over: #dee2e6;
+  --toc-bg: #e9ecef;
+  --toc-item-color: #495057;
+  --toc-item-hover: #495057;
+  --toc-item-hover-bg: #dee2e6;
+  --toc-item-active: #212529;
+  --toc-item-active-bg: #ced4da;
+  --button-bg: #495057;
+  --button-hover: #343a40;
+  --reader-content-bg: #f8f9fa;
+  --reader-content-color: #212529;
+  --scrollbar-track: #e9ecef;
+  --scrollbar-thumb: #ced4da;
+  --scrollbar-thumb-hover: #adb5bd;
+}

@@ -1,0 +1,27 @@
+/* 中国月白主题 Variables */
+:root[data-theme="chinese-moon"] {
+  --bg-primary: #f8f9ff;
+  --bg-secondary: #edf2ff;
+  --text-primary: #1e3a8a;
+  --text-secondary: #3730a3;
+  --border-color: #c7d2fe;
+  --accent-color: #6366f1;
+  --accent-hover: #4f46e5;
+  --drop-zone-bg: #edf2ff;
+  --drop-zone-border: #c7d2fe;
+  --drop-zone-hover: #e0e7ff;
+  --drop-zone-drag-over: #c7d2fe;
+  --toc-bg: #edf2ff;
+  --toc-item-color: #3730a3;
+  --toc-item-hover: #6366f1;
+  --toc-item-hover-bg: #e0e7ff;
+  --toc-item-active: #4f46e5;
+  --toc-item-active-bg: #c7d2fe;
+  --button-bg: #6366f1;
+  --button-hover: #4f46e5;
+  --reader-content-bg: #f8f9ff;
+  --reader-content-color: #1e3a8a;
+  --scrollbar-track: #e0e7ff;
+  --scrollbar-thumb: #c7d2fe;
+  --scrollbar-thumb-hover: #a5b4fc;
+}
