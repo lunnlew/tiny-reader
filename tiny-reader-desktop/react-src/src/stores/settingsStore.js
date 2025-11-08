@@ -227,6 +227,8 @@ export const useSettingsStore = create((set, get) => ({
       newBindings.nextChapter.push(key);
     } else if (action === 'prevChapter' && !newBindings.prevChapter.includes(key)) {
       newBindings.prevChapter.push(key);
+    } else if (action === 'fullscreen' && !newBindings.fullscreen.includes(key)) {
+      newBindings.fullscreen.push(key);
     }
     const newState = { keyBindings: newBindings };
     saveSettings({ ...state, ...newState });

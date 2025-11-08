@@ -8,7 +8,15 @@
   "enableNativeAPI": true,
   "nativeAllowList": [
     "app.*",
-    "filesystem.readDirectory"
+    "app.exit",
+    "filesystem.readDirectory",
+    "filesystem.readBinaryFile",
+    "os.showOpenDialog",
+    "window.setMainMenu",
+    "window.on",
+    "window.isFullScreen",
+    "window.setFullScreen",
+    "window.exitFullScreen"
   ],
   "modes": {
     "window": {

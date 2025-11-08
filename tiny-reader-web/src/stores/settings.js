@@ -117,6 +117,8 @@ export const useSettingsStore = defineStore('settings', {
         this.keyBindings.nextChapter.push(key)
       } else if (action === 'prevChapter' && !this.keyBindings.prevChapter.includes(key)) {
         this.keyBindings.prevChapter.push(key)
+      } else if (action === 'fullscreen' && !this.keyBindings.fullscreen.includes(key)) {
+        this.keyBindings.fullscreen.push(key) 
       }
     },
     

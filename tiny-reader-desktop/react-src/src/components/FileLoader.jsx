@@ -8,6 +8,9 @@ import NavigationControls from './NavigationControls';
 import AutoScrollControls from './AutoScrollControls';
 import ReaderView from './ReaderView';
 
+// Import Neutralino for native window methods
+import Neutralino from '@neutralinojs/lib';
+
 const FileLoader = ({ isMobile = false }) => {
   const readerStore = useReaderStore();
   const settingsStore = useSettingsStore();
@@ -23,61 +26,20 @@ const FileLoader = ({ isMobile = false }) => {
     settingsStore.toggleSettings();
   };
 
-  // 处理键盘事件
-  useEffect(() => {
-    const handleKeyboard = (e) => {
-      // 避开输入框、文本区域或可编辑元素时才响应
-      const activeElement = document.activeElement;
-      if (activeElement && (activeElement.tagName === 'INPUT' ||
-        activeElement.tagName === 'TEXTAREA' ||
-        activeElement.contentEditable === 'true')) {
-        return;
-      }
-
-      // Check if the pressed key matches any of the configured fullscreen keys
-      if (settingsStore.keyBindings.fullscreen.includes(e.key)) {
-        e.preventDefault();
-        toggleFullscreen();
-        return;
-      }
-
-      // Check if the pressed key matches any of the configured next chapter keys
-      if (settingsStore.keyBindings.nextChapter.includes(e.key)) {
-        e.preventDefault();
-        nextChapter();
-        return;
-      }
-
-      // Check if the pressed key matches any of the configured previous chapter keys
-      if (settingsStore.keyBindings.prevChapter.includes(e.key)) {
-        e.preventDefault();
-        prevChapter();
-        return;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyboard);
-    return () => {
-      window.removeEventListener('keydown', handleKeyboard);
-    };
-  }, []);
-
   // 切换全屏模式
-  const toggleFullscreen = () => {
-    const elem = document.documentElement;
+  const toggleFullscreen = async () => {
+    try {
+      const isCurrentlyFullscreen = await Neutralino.window.isFullScreen();
 
-    if (!document.fullscreenElement) {
-      elem.requestFullscreen().then(() => {
+      if (!isCurrentlyFullscreen) {
+        await Neutralino.window.setFullScreen();
         settingsStore.setFullscreen(true);
-      }).catch(err => {
-        console.error('Failed to enter fullscreen:', err);
-      });
-    } else {
-      document.exitFullscreen().then(() => {
+      } else {
+        await Neutralino.window.exitFullScreen();
         settingsStore.setFullscreen(false);
-      }).catch(err => {
-        console.error('Failed to exit fullscreen:', err);
-      });
+      }
+    } catch (error) {
+      console.error('Failed to toggle fullscreen:', error);
     }
   };
 
@@ -231,6 +193,59 @@ const FileLoader = ({ isMobile = false }) => {
   useEffect(() => {
     readerStore.loadFromCache();
   }, []);
+
+
+  // 处理键盘事件
+  useEffect(() => {
+    const handleKeyboard = (e) => {
+      // 避开输入框、文本区域或可编辑元素时才响应
+      const activeElement = document.activeElement;
+      if (activeElement && (activeElement.tagName === 'INPUT' ||
+        activeElement.tagName === 'TEXTAREA' ||
+        activeElement.contentEditable === 'true')) {
+        return;
+      }
+
+      // Check if the pressed key matches any of the configured fullscreen keys
+      if (settingsStore.keyBindings.fullscreen.includes(e.key)) {
+        e.preventDefault();
+        toggleFullscreen();
+        return;
+      }
+
+      // Check if the pressed key matches any of the configured next chapter keys
+      if (settingsStore.keyBindings.nextChapter.includes(e.key)) {
+        e.preventDefault();
+        nextChapter();
+        return;
+      }
+
+      // Check if the pressed key matches any of the configured previous chapter keys
+      if (settingsStore.keyBindings.prevChapter.includes(e.key)) {
+        e.preventDefault();
+        prevChapter();
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyboard);
+    return () => {
+      window.removeEventListener('keydown', handleKeyboard);
+    };
+  }, [settingsStore.keyBindings, toggleFullscreen, nextChapter, prevChapter]);
+  // Add effect for handling menu-triggered fullscreen and other events
+  useEffect(() => {
+    // Add event listener for menu-triggered fullscreen
+    const handleFullscreenEvent = () => {
+      toggleFullscreen();
+    };
+
+    window.addEventListener('neutralinoToggleFullscreen', handleFullscreenEvent);
+
+    return () => {
+      window.removeEventListener('neutralinoToggleFullscreen', handleFullscreenEvent);
+    };
+  }, [toggleFullscreen]); // Add toggleFullscreen to the dependency array
 
   return (
     <div className="file-loader-container">

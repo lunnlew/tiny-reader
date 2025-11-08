@@ -3,8 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.jsx';
 
-// Import init function from "@neutralinojs/lib"
-import { init } from "@neutralinojs/lib"
+import { initNeutralinoApp } from './neutralino-init';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
@@ -14,4 +13,5 @@ root.render(
   </React.StrictMode>
 );
 
-init(); // Add this function call
+// Initialize our custom Neutralino functionality (will only run when Neutralino is ready)
+initNeutralinoApp();

@@ -343,4 +343,7 @@ export const useReaderStore = create((set, get) => ({
 
   // Action to update drag over state
   setDragOver: (isDragOver) => set({ isDragOver }),
+  
+  // Action to update loading state
+  setIsLoading: (isLoading) => set({ isLoading }),
 }));
