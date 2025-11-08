@@ -31,8 +31,12 @@ export const useSettingsStore = defineStore('settings', {
     // 键盘快捷键设置
     keyBindings: {
       nextChapter: ['ArrowRight', 'PageDown', ' '],  // 下一章键，默认为右箭头、PageDown、空格
-      prevChapter: ['ArrowLeft', 'PageUp']          // 上一章键，默认为左箭头、PageUp
-    }
+      prevChapter: ['ArrowLeft', 'PageUp'],         // 上一章键，默认为左箭头、PageUp
+      fullscreen: ['F11', 'F']                      // 全屏键，默认为F11和F
+    },
+    
+    // 全屏模式
+    isFullscreen: false
   }),
   
   actions: {
@@ -119,13 +123,27 @@ export const useSettingsStore = defineStore('settings', {
         this.keyBindings.nextChapter = this.keyBindings.nextChapter.filter(k => k !== key)
       } else if (action === 'prevChapter') {
         this.keyBindings.prevChapter = this.keyBindings.prevChapter.filter(k => k !== key)
+      } else if (action === 'fullscreen') {
+        this.keyBindings.fullscreen = this.keyBindings.fullscreen.filter(k => k !== key)
       }
+    },
+    
+    // 切换全屏模式
+    async toggleFullscreen() {
+      // This will be handled by the component that manages the DOM element
+      // For now, we just update the state
+      this.isFullscreen = !this.isFullscreen;
+    },
+    
+    // 设置全屏状态
+    setFullscreen(fullscreenState) {
+      this.isFullscreen = fullscreenState;
     }
   },
 
   persist: {
     key: 'reader-settings',
     storage: localStorage,
-    paths: ['theme', 'fontSize', 'lineHeight', 'maxWidth', 'isTocVisible', 'keyBindings']
+    paths: ['theme', 'fontSize', 'lineHeight', 'maxWidth', 'isTocVisible', 'keyBindings', 'isFullscreen']
   }
 })

@@ -74,6 +74,7 @@
 import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
 import { useReaderStore } from '../stores/reader'
 import { useSettingsStore } from '../stores/settings'
+import { FullscreenService } from '../services/fullscreen'
 import ReaderView from './ReaderView.vue'
 import FileDropZone from './FileDropZone.vue'
 import FileLoadingIndicator from './FileLoadingIndicator.vue'
@@ -196,6 +197,13 @@ function handleKeyboard(e) {
     return
   }
 
+  // Check if the pressed key matches any of the configured fullscreen keys
+  if (settingsStore.keyBindings.fullscreen.includes(e.key)) {
+    e.preventDefault()
+    toggleFullscreen()
+    return
+  }
+
   // Check if the pressed key matches any of the configured next chapter keys
   if (settingsStore.keyBindings.nextChapter.includes(e.key)) {
     e.preventDefault()
@@ -208,6 +216,17 @@ function handleKeyboard(e) {
     e.preventDefault()
     prevChapter()
     return
+  }
+}
+
+// 切换全屏模式
+async function toggleFullscreen() {
+  try {
+    await FullscreenService.toggleFullscreen();
+    // Update the store state to reflect the fullscreen state
+    settingsStore.setFullscreen(FullscreenService.isFullscreen());
+  } catch (error) {
+    console.error('Failed to toggle fullscreen:', error);
   }
 }
 

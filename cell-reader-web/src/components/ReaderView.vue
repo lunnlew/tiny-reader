@@ -293,6 +293,39 @@ function applySettings() {
   /* Center the reader container */
 }
 
+/* Fullscreen mode adjustments */
+.reader-container:fullscreen {
+  width: 100%;
+  height: 100%;
+  padding: 2rem;
+  background: var(--bg-secondary, #ffffff);
+  overflow: auto;
+}
+
+.reader-container:-webkit-full-screen {
+  width: 100%;
+  height: 100%;
+  padding: 2rem;
+  background: var(--bg-secondary, #ffffff);
+  overflow: auto;
+}
+
+.reader-container:-moz-full-screen {
+  width: 100%;
+  height: 100%;
+  padding: 2rem;
+  background: var(--bg-secondary, #ffffff);
+  overflow: auto;
+}
+
+.reader-container:-ms-fullscreen {
+  width: 100%;
+  height: 100%;
+  padding: 2rem;
+  background: var(--bg-secondary, #ffffff);
+  overflow: auto;
+}
+
 .reader-content {
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   font-size: 16px;

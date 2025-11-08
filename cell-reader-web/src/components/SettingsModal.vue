@@ -204,6 +204,31 @@
                 <button @click="clearKeys('prevChapter')" class="clear-btn">清除</button>
               </div>
             </div>
+            
+            <div class="key-binding-row">
+              <label>全屏快捷键：</label>
+              <div class="key-chips">
+                <span 
+                  v-for="(key, index) in settingsStore.keyBindings.fullscreen" 
+                  :key="index"
+                  class="key-chip"
+                >
+                  {{ getKeyDisplay(key) }}
+                  <button @click="removeKey('fullscreen', key)" class="remove-key">×</button>
+                </span>
+              </div>
+              <div class="add-key-controls">
+                <input 
+                  type="text" 
+                  placeholder="按任意键..."
+                  @keydown="captureKey('fullscreen', $event)"
+                  @focus="startKeyCapture('fullscreen')"
+                  v-model="inputtingFullscreenKey"
+                  readonly
+                />
+                <button @click="clearKeys('fullscreen')" class="clear-btn">清除</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -225,6 +250,7 @@ import { useIsMobile } from '../utils/deviceDetection'
 const settingsStore = useSettingsStore()
 const inputtingNextKey = ref('')
 const inputtingPrevKey = ref('')
+const inputtingFullscreenKey = ref('')
 const isCapturing = ref(false)
 
 // Check if device is mobile
@@ -266,6 +292,8 @@ function startKeyCapture(action) {
       inputtingNextKey.value = '按任意键...'
     } else if (action === 'prevChapter') {
       inputtingPrevKey.value = '按任意键...'
+    } else if (action === 'fullscreen') {
+      inputtingFullscreenKey.value = '按任意键...'
     }
   })
 }
@@ -293,6 +321,11 @@ function captureKey(action, event) {
       settingsStore.addKeyBinding(action, key)
     }
     inputtingPrevKey.value = ''
+  } else if (action === 'fullscreen') {
+    if (!settingsStore.keyBindings.fullscreen.includes(key)) {
+      settingsStore.addKeyBinding(action, key)
+    }
+    inputtingFullscreenKey.value = ''
   }
   
   isCapturing.value = false
@@ -300,7 +333,13 @@ function captureKey(action, event) {
 
 // 移除按键绑定
 function removeKey(action, key) {
-  settingsStore.removeKeyBinding(action, key)
+  if (action === 'nextChapter') {
+    settingsStore.keyBindings.nextChapter = settingsStore.keyBindings.nextChapter.filter(k => k !== key)
+  } else if (action === 'prevChapter') {
+    settingsStore.keyBindings.prevChapter = settingsStore.keyBindings.prevChapter.filter(k => k !== key)
+  } else if (action === 'fullscreen') {
+    settingsStore.keyBindings.fullscreen = settingsStore.keyBindings.fullscreen.filter(k => k !== key)
+  }
 }
 
 // 获取按键的显示文本
@@ -343,6 +382,8 @@ function clearKeys(action) {
     settingsStore.keyBindings.nextChapter = []
   } else if (action === 'prevChapter') {
     settingsStore.keyBindings.prevChapter = []
+  } else if (action === 'fullscreen') {
+    settingsStore.keyBindings.fullscreen = []
   }
 }
 </script>
