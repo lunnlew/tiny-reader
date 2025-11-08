@@ -1,27 +1,27 @@
-/* Chinese Teal Theme Variables */
+/* 中国青绿主题 Variables */
 :root[data-theme="chinese-teal"] {
   --bg-primary: #f0fdfa;
   --bg-secondary: #ecfdf5;
   --text-primary: #0f766e;
   --text-secondary: #115e59;
   --border-color: #a7f3d0;
-  --accent-color: #14b8a6;
-  --accent-hover: #0d9488;
+  --accent-color: #10b981;
+  --accent-hover: #059669;
   --drop-zone-bg: #ecfdf5;
   --drop-zone-border: #a7f3d0;
-  --drop-zone-hover: #6ee7b7;
+  --drop-zone-hover: #d1fae5;
   --drop-zone-drag-over: #a7f3d0;
   --toc-bg: #ecfdf5;
   --toc-item-color: #115e59;
-  --toc-item-hover: #14b8a6;
-  --toc-item-hover-bg: #a7f3d0;
-  --toc-item-active: #14b8a6;
+  --toc-item-hover: #10b981;
+  --toc-item-hover-bg: #d1fae5;
+  --toc-item-active: #10b981;
   --toc-item-active-bg: #a7f3d0;
-  --button-bg: #14b8a6;
-  --button-hover: #0d9488;
-  --reader-content-bg: #ecfdf5;
+  --button-bg: #10b981;
+  --button-hover: #059669;
+  --reader-content-bg: #f0fdfa;
   --reader-content-color: #0f766e;
-  --scrollbar-track: #a7f3d0;
-  --scrollbar-thumb: #6ee7b7;
-  --scrollbar-thumb-hover: #34d399;
+  --scrollbar-track: #d1fae5;
+  --scrollbar-thumb: #a7f3d0;
+  --scrollbar-thumb-hover: #6ee7b7;
 }

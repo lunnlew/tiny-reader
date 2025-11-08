@@ -403,6 +403,7 @@ function scrollToTop() {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  flex: 1;
 }
 
 .file-input {
@@ -415,7 +416,7 @@ function scrollToTop() {
   display: flex;
   flex-direction: column;
   /* overflow: hidden; */
-  padding-bottom: 20px;
+  /* padding-bottom: 20px; */
   background-color: var(--bg-primary, #f9fafb);
 }
 
