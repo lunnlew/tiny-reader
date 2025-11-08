@@ -4,66 +4,24 @@
     <input type="file" ref="fileInputRef" accept=".txt" @change="onFileSelect" class="file-input" />
 
     <!-- Show file loader when no content is loaded -->
-    <div v-if="!readerStore.currentChapterContent && !readerStore.isLoading" class="drop-zone"
-      :class="{ 'drag-over': readerStore.isDragOver }" @dragover.prevent="handleDragOver" @dragleave="handleDragLeave"
-      @drop.prevent="handleDrop" @click="triggerFileSelect">
-      <div class="drop-content">
-        <div class="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
-        </div>
-        <h3 class="title">选择或拖放文件到这里</h3>
-        <p class="subtitle">支持 .txt 格式文件</p>
-        <button class="select-btn" @click.stop="triggerFileSelect">
-          选择文件
-        </button>
-      </div>
-    </div>
+    <FileDropZone v-if="!readerStore.currentChapterContent && !readerStore.isLoading"
+      :is-drag-over="readerStore.isDragOver" @drag-over="handleDragOver" @drag-leave="handleDragLeave"
+      @drop-file="onDropFile" @trigger-file-select="triggerFileSelect" />
 
     <!-- Loading state for initial file processing -->
-    <div v-else-if="readerStore.isLoading && !readerStore.toc.length" class="loading-container">
-      <div class="loading-overlay">
-        <div class="spinner"></div>
-        <p>正在加载文件...</p>
-      </div>
-    </div>
+    <FileLoadingIndicator v-else-if="readerStore.isLoading" :is-loading="readerStore.isLoading"
+      :has-toc="readerStore.toc.length > 0" />
 
     <!-- File content viewer with pagination when content is available -->
     <div v-else class="reading-layout">
-      <!-- Table of Contents on the left -->
-      <Transition name="toc-panel">
-        <div v-if="readerStore.toc.length > 0 && settingsStore.isTocVisible" class="toc-panel">
-          <div class="toc-header">
-            <h2 class="toc-title">目录</h2>
-            <div class="toc-actions">
-              <button @click="toggleSettings" class="settings-btn" title="设置">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="3"></circle>
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                </svg>
-              </button>
-              <button @click="triggerFileSelect" class="reload-file-btn" title="重新加载文件">
-                ↻
-              </button>
-            </div>
-          </div>
-          <div class="toc-content">
-            <TocView :toc="readerStore.toc" @jump="jumpToChapter" />
-          </div>
-        </div>
-      </Transition>
+      <!-- Table of Contents on the left (hidden on mobile) -->
+      <TocPanel v-show="readerStore.toc.length > 0 && settingsStore.isTocVisible" :toc="readerStore.toc"
+        :current-chapter-index="readerStore.currentChapterIndex" :is-toc-visible="settingsStore.isTocVisible"
+        @toggle-settings="toggleSettings" @reload-file="triggerFileSelect" @jump-to-chapter="jumpToChapter" />
 
-      <!-- 目录收起/展开切换按钮 -->
+      <!-- 目录收起/展开切换按钮 (hidden on mobile) -->
       <div v-if="readerStore.toc.length > 0" class="toc-toggle-divider">
-        <button 
-          @click="toggleToc" 
-          :title="settingsStore.isTocVisible ? '隐藏目录' : '显示目录'"
-          class="toc-toggle-btn"
-        >
+        <button @click="toggleToc" :title="settingsStore.isTocVisible ? '隐藏目录' : '显示目录'" class="toc-toggle-btn">
           {{ settingsStore.isTocVisible ? '«' : '»' }}
         </button>
       </div>
@@ -81,61 +39,21 @@
             <div class="spinner"></div>
             <p>正在加载章节...</p>
           </div>
-          <ReaderView v-else :content="readerStore.currentChapterContent" />
+          <ReaderView :content="readerStore.currentChapterContent"/>
         </div>
 
-        <!-- Navigation controls at the bottom -->
-        <div v-if="readerStore.toc.length > 0" class="bottom-controls">
-          <div class="nav-wrapper">
-            <button @click="prevChapter" :disabled="readerStore.currentChapterIndex <= 0" class="nav-btn">
-              ← 上一章
-            </button>
-            <span class="chapter-info">
-              第 {{ readerStore.currentChapterIndex + 1 }} 章，共 {{ readerStore.toc.length }} 章
-            </span>
-            <button @click="nextChapter" :disabled="readerStore.currentChapterIndex >= readerStore.toc.length - 1"
-              class="nav-btn">
-              下一章 →
-            </button>
-            
+        <!-- Navigation controls at the bottom (hidden on mobile) -->
+        <div v-if="readerStore.toc.length > 0" class="bottom-controls-container">
+          <div class="bottom-controls-content">
+            <NavigationControls :current-chapter-index="readerStore.currentChapterIndex"
+              :toc-length="readerStore.toc.length" @prev-chapter="prevChapter" @next-chapter="nextChapter" />
+
             <!-- Auto-scroll and auto-pagination controls -->
-            <div class="auto-controls">
-              <div class="auto-control-group">
-                <label class="auto-control-label">
-                  <input 
-                    type="checkbox" 
-                    v-model="settingsStore.isAutoScrollEnabled" 
-                    @change="toggleAutoScroll"
-                    class="auto-checkbox"
-                  />
-                  自动滚动
-                </label>
-                <input 
-                  type="range" 
-                  v-if="settingsStore.isAutoScrollEnabled"
-                  v-model.number="settingsStore.autoScrollSpeed" 
-                  min="10" 
-                  max="200" 
-                  step="10"
-                  class="speed-slider"
-                  title="滚动速度"
-                />
-                <span v-if="settingsStore.isAutoScrollEnabled" class="speed-value">
-                  {{ settingsStore.autoScrollSpeed }} px/s
-                </span>
-              </div>
-              
-              <div class="auto-control-group">
-                <label class="auto-control-label">
-                  <input 
-                    type="checkbox" 
-                    v-model="settingsStore.isAutoPaginationEnabled" 
-                    class="auto-checkbox"
-                  />
-                  自动翻页
-                </label>
-              </div>
-            </div>
+            <AutoScrollControls :is-auto-scroll-enabled="settingsStore.isAutoScrollEnabled"
+              :auto-scroll-speed="settingsStore.autoScrollSpeed"
+              :is-auto-pagination-enabled="settingsStore.isAutoPaginationEnabled"
+              @update:is-auto-scroll-enabled="updateAutoScrollEnabled" @update:auto-scroll-speed="updateAutoScrollSpeed"
+              @update:is-auto-pagination-enabled="updateAutoPaginationEnabled" @toggle-auto-scroll="toggleAutoScroll" />
           </div>
         </div>
       </div>
@@ -149,7 +67,11 @@ import { useReaderStore } from '../stores/reader'
 import { useSettingsStore } from '../stores/settings'
 import ReaderView from './ReaderView.vue'
 import TocView from './TocView.vue'
-import { decodeTextWithDetection } from '../utils/encoding'
+import FileDropZone from './FileDropZone.vue'
+import FileLoadingIndicator from './FileLoadingIndicator.vue'
+import TocPanel from './TocPanel.vue'
+import NavigationControls from './NavigationControls.vue'
+import AutoScrollControls from './AutoScrollControls.vue'
 
 const readerStore = useReaderStore()
 const settingsStore = useSettingsStore()
@@ -169,13 +91,13 @@ function toggleSettings() {
 function handleKeyboard(e) {
   // 遰心输入框、文本区域或可编辑元素时才响应
   const activeElement = document.activeElement
-  if (activeElement && (activeElement.tagName === 'INPUT' || 
-      activeElement.tagName === 'TEXTAREA' || 
-      activeElement.contentEditable === 'true')) {
+  if (activeElement && (activeElement.tagName === 'INPUT' ||
+    activeElement.tagName === 'TEXTAREA' ||
+    activeElement.contentEditable === 'true')) {
     return
   }
-  
-  switch(e.key) {
+
+  switch (e.key) {
     case 'ArrowLeft':
       e.preventDefault()
       prevChapter()
@@ -208,8 +130,7 @@ onUnmounted(() => {
 })
 
 // Handle drag over event
-function handleDragOver(e) {
-  e.preventDefault()
+function handleDragOver() {
   if (!readerStore.isDragOver) {
     console.log('File drag over detected')
     readerStore.isDragOver = true
@@ -223,15 +144,13 @@ function handleDragLeave() {
 }
 
 // Handle drop event
-function handleDrop(e) {
-  e.preventDefault()
+function onDropFile(file) {
   readerStore.isDragOver = false
 
-  const files = e.dataTransfer.files
-  console.log('File drop event received:', files)
-  if (files.length > 0 && (files[0].type.startsWith('text/') || files[0].name.endsWith('.txt'))) {
-    console.log('Processing dropped file:', files[0].name, 'Size:', files[0].size, 'bytes')
-    readerStore.processFile(files[0])
+  console.log('File drop event received:', file)
+  if (file && (file.type.startsWith('text/') || file.name.endsWith('.txt'))) {
+    console.log('Processing dropped file:', file.name, 'Size:', file.size, 'bytes')
+    readerStore.processFile(file)
   }
 }
 
@@ -306,6 +225,21 @@ function toggleAutoScroll() {
       }
     }))
   }
+}
+
+// Update auto scroll enabled state
+function updateAutoScrollEnabled(value) {
+  settingsStore.isAutoScrollEnabled = value
+}
+
+// Update auto scroll speed
+function updateAutoScrollSpeed(value) {
+  settingsStore.autoScrollSpeed = value
+}
+
+// Update auto pagination enabled state
+function updateAutoPaginationEnabled(value) {
+  settingsStore.isAutoPaginationEnabled = value
 }
 </script>
 
@@ -470,7 +404,7 @@ function toggleAutoScroll() {
   height: 100%;
   display: flex;
   flex-direction: row;
-  overflow: hidden;
+  /* overflow: hidden; */
   padding-bottom: 20px;
   background-color: var(--bg-primary, #f9fafb);
 }
@@ -487,6 +421,7 @@ function toggleAutoScroll() {
   height: 100%;
   min-height: 0;
   transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
 .toc-toggle-divider {
@@ -548,10 +483,11 @@ function toggleAutoScroll() {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 1rem;
+  padding: 0;
   background-color: var(--bg-secondary, white);
-  height: 100%;
-  min-width: 0; /* 确保flex item可以缩小 */
+  height: auto;
+  min-width: 0;
+  /* 确保flex item可以缩小 */
 }
 
 .toc-panel {
@@ -580,6 +516,7 @@ function toggleAutoScroll() {
   min-height: 0;
   height: 100%;
   padding: 2rem 0;
+  background-color: var(--bg-secondary, white);
 }
 
 .toc-header {
@@ -593,7 +530,8 @@ function toggleAutoScroll() {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-left: auto; /* 让按钮组靠右对齐 */
+  margin-left: auto;
+  /* 让按钮组靠右对齐 */
 }
 
 .toc-title {
@@ -603,7 +541,10 @@ function toggleAutoScroll() {
   color: var(--text-primary, #1f2937);
 }
 
-.reload-file-btn, .settings-btn, .toc-collapse-btn, .toc-expand-btn {
+.reload-file-btn,
+.settings-btn,
+.toc-collapse-btn,
+.toc-expand-btn {
   background-color: var(--toc-item-hover-bg, #e5e7eb);
   color: var(--text-secondary, #4b5563);
   border: none;
@@ -619,7 +560,9 @@ function toggleAutoScroll() {
   padding: 0;
 }
 
-.reload-file-btn:hover, .settings-btn:hover, .toc-collapse-btn:hover {
+.reload-file-btn:hover,
+.settings-btn:hover,
+.toc-collapse-btn:hover {
   background-color: var(--border-color, #d1d5db);
 }
 
@@ -648,7 +591,8 @@ function toggleAutoScroll() {
   height: 14px;
   display: block;
   fill: none;
-  stroke: currentColor; /* 明确指定SVG继承文字颜色 */
+  stroke: currentColor;
+  /* 明确指定SVG继承文字颜色 */
   stroke-width: 2;
 }
 
@@ -704,16 +648,6 @@ function toggleAutoScroll() {
   color: #b91c1c;
   /* Red-700 */
   font-size: 0.8125rem;
-}
-
-.main-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  padding: 0.75rem 1rem;  /* 调整为更合适的内边距 */
-  background-color: var(--bg-secondary, white);
-  height: 100%;
 }
 
 .reader-container {
@@ -781,14 +715,35 @@ function toggleAutoScroll() {
   flex: 0 1 auto;
   margin: 0 1rem;
   opacity: 0.8;
-  min-width: 120px;  /* 确保有足够的空间显示章节信息 */
+  min-width: 120px;
+  /* 确保有足够的空间显示章节信息 */
+}
+
+.bottom-controls-container {
+  margin-top: 1rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--border-color, #e5e7eb);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.bottom-controls-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  width: 100%;
+  max-width: 800px;
+  /* Match the reader content width */
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
 /* Auto-scroll controls */
 .auto-controls {
   display: flex;
   gap: 1rem;
-  margin-left: 1.5rem;
   align-items: center;
 }
 
@@ -828,5 +783,36 @@ function toggleAutoScroll() {
   color: var(--text-secondary, #6b7280);
   min-width: 50px;
   text-align: left;
+}
+
+/* Responsive styles for mobile */
+@media (max-width: 768px) {
+  .reading-layout {
+    flex-direction: column;
+  }
+
+  .toc-panel {
+    display: none;
+  }
+
+  .toc-toggle-divider,
+  .bottom-controls-container {
+    display: none;
+  }
+
+  .reader-container {
+    padding: 1rem;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 769px) {
+  .reading-layout {
+    flex-direction: row;
+  }
+
+  .toc-panel {
+    display: flex;
+  }
 }
 </style>

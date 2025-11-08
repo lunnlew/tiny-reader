@@ -2,7 +2,8 @@
   <div class="toc-container">
     <ul class="toc-list">
       <li v-for="(item, i) in toc" :key="i" @click="jumpToChapter(item, i)"
-        :class="{ 'active-chapter': i === activeIndex }" class="toc-item">
+        :class="{ 'active-chapter': i === activeIndex }" class="toc-item"
+        :ref="el => setItemRef(el, i)">
         {{ item.title }}
       </li>
     </ul>
@@ -10,28 +11,97 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, nextTick, watch } from 'vue';
 
 const props = defineProps({
-  toc: Array
+  toc: Array,
+  currentChapterIndex: {
+    type: Number,
+    default: -1
+  }
 })
+
+console.log('currentChapterIndex', props.currentChapterIndex)
 
 const emit = defineEmits(['jump'])
 const activeIndex = ref(-1)
+const itemRefs = ref({})
+let hasUserInteracted = false
+let isInitialLoad = true
 
-// Update active chapter when clicked
-function jumpToChapter(item, index) {
-  console.log('TOC item clicked:', item.title, 'at index', index, 'with offset', item.offset);
-  activeIndex.value = index
-  emit('jump', index) // Pass the index instead of the offset
+// Set up refs for list items
+function setItemRef(el, index) {
+  if (el) {
+    itemRefs.value[index] = el;
+  }
 }
+
+// Update active chapter when clicked - this means user has interacted, so disable auto-scroll
+function jumpToChapter(item, index) {
+  activeIndex.value = index
+  hasUserInteracted = true  // Use let variable, not ref, so it persists
+  isInitialLoad = false
+  emit('jump', index)
+}
+
+// Watch for changes to currentChapterIndex prop to update active index (but not necessarily scroll)
+watch(() => props.currentChapterIndex, async (newIndex) => {
+  if (newIndex >= 0) {
+    activeIndex.value = newIndex;
+    
+    // Skip scrolling on initial load, only scroll when user has interacted
+    if (hasUserInteracted) {
+      await nextTick();
+      const activeElement = itemRefs.value[newIndex];
+      if (activeElement && activeElement.scrollIntoView) {
+        activeElement.scrollIntoView({ 
+          behavior: 'auto', // Use 'auto' for immediate scroll instead of smooth
+          block: 'center',
+          inline: 'nearest'
+        });
+      }
+    }
+  }
+}, { immediate: true });
+
+// Function to explicitly scroll to current chapter
+function scrollToCurrentChapter() {
+  if (props.currentChapterIndex >= 0) {
+    activeIndex.value = props.currentChapterIndex;
+    nextTick(() => {
+      const activeElement = itemRefs.value[props.currentChapterIndex];
+      if (activeElement && activeElement.scrollIntoView) {
+        activeElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center',
+          inline: 'nearest'
+        });
+      }
+    });
+  }
+}
+
+// Function to update current chapter without scrolling
+function updateCurrentChapter(index) {
+  if (index >= 0) {
+    activeIndex.value = index;
+  }
+}
+
+// Expose functions to parent component
+defineExpose({
+  scrollToCurrentChapter,
+  updateCurrentChapter,
+  resetUserInteraction: () => {
+    hasUserInteracted = false;
+  }
+})
 </script>
 
 <style scoped>
 .toc-container {
   background: var(--toc-bg, #ffffff);
   padding: 1rem;
-  border-radius: 8px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   flex-shrink: 0;
   overflow-y: auto;
@@ -56,7 +126,6 @@ function jumpToChapter(item, index) {
   padding: 0;
   margin: 0;
   flex: 1;
-  overflow-y: auto;
 }
 
 .toc-item {

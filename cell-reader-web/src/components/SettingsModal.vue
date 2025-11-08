@@ -107,6 +107,48 @@
             <option value="'Microsoft YaHei', 'PingFang SC', sans-serif">微软雅黑</option>
           </select>
         </div>
+        
+        <!-- 自动滚动设置 -->
+        <div class="setting-group">
+          <h3>自动滚动</h3>
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input 
+                type="checkbox" 
+                v-model="settingsStore.isAutoScrollEnabled"
+              />
+              启用自动滚动
+            </label>
+          </div>
+          
+          <div v-if="settingsStore.isAutoScrollEnabled" class="sub-settings">
+            <div class="slider-container">
+              <label>滚动速度</label>
+              <input 
+                type="range" 
+                min="10" 
+                max="200" 
+                step="10" 
+                v-model.number="settingsStore.autoScrollSpeed" 
+                class="slider"
+              />
+              <span class="slider-value">{{ settingsStore.autoScrollSpeed }} px/s</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 自动翻页设置 -->
+        <div class="setting-group">
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input 
+                type="checkbox" 
+                v-model="settingsStore.isAutoPaginationEnabled"
+              />
+              启用自动翻页
+            </label>
+          </div>
+        </div>
       </div>
 
       <!-- 按钮区域 -->
@@ -417,5 +459,31 @@ function closeSettings() {
 .font-family-select:hover {
   border-color: var(--accent-color, #4f46e5);
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.checkbox-group {
+  margin-bottom: 1rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+  color: var(--text-primary, #374151);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.sub-settings {
+  margin-left: 1.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-color, #e5e7eb);
 }
 </style>

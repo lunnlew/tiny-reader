@@ -1,7 +1,8 @@
 <template>
   <div class="app-container">
     <div class="app-main">
-      <FileLoader />
+      <FileLoader v-if="!isMobile" />
+      <MobileFileLoader v-else />
     </div>
     
     <!-- 设置模态框 -->
@@ -10,12 +11,19 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, computed } from 'vue';
 import FileLoader from './components/FileLoader.vue';
+import MobileFileLoader from './components/MobileFileLoader.vue';
 import SettingsModal from './components/SettingsModal.vue';
 import { useSettingsStore } from './stores/settings';
 
 const settingsStore = useSettingsStore();
+
+// Check if device is mobile
+const isMobile = computed(() => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    window.innerWidth <= 768;
+})
 
 onMounted(() => {
   console.log('App component mounted, ready to load files');

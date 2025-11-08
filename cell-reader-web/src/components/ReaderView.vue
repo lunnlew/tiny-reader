@@ -308,7 +308,7 @@ function applySettings() {
   max-width: 800px;
   /* 这会被applySettings覆盖 */
   /* Limit line length for better reading experience */
-  padding: 5rem 2rem;
+  padding: 5rem 0rem;
   /* 调整内边距到左右 */
   /* Add padding for better readability */
   overflow-x: auto;
