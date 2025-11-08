@@ -191,15 +191,46 @@ function jumpToChapter(index) {
   scrollToTop()
 }
 
-// Next chapter handler
+// Check if current chapter content can be scrolled further
+function canScrollCurrentChapter() {
+  const readerContainer = document.querySelector('.reader-container');
+  if (!readerContainer) return false;
+  
+  // Check if we're not at the bottom of the content
+  const maxScroll = readerContainer.scrollHeight - readerContainer.clientHeight;
+  return readerContainer.scrollTop < maxScroll - 5; // 5px tolerance
+}
+
+// Scroll to next page within current chapter
+function scrollToNextPage() {
+  const readerContainer = document.querySelector('.reader-container');
+  if (!readerContainer) return;
+  
+  const viewportHeight = readerContainer.clientHeight;
+  const currentScrollTop = readerContainer.scrollTop;
+  const maxScroll = readerContainer.scrollHeight - readerContainer.clientHeight;
+  
+  // Calculate next page position (scroll 90% of viewport)
+  const nextPagePosition = Math.min(currentScrollTop + viewportHeight * 0.9, maxScroll);
+  
+  readerContainer.scrollTop = nextPagePosition;
+}
+
+// Next chapter handler (with pagination within chapter)
 function nextChapter() {
-  if (readerStore.currentChapterIndex < readerStore.toc.length - 1) {
-    console.log('Moving to next chapter')
-    readerStore.loadChapter(readerStore.currentChapterIndex + 1)
-    // 自动滚动到顶部
-    scrollToTop()
+  // First check if we can scroll more within the current chapter
+  if (canScrollCurrentChapter()) {
+    scrollToNextPage();
   } else {
-    console.log('Already at the last chapter')
+    // If no more to scroll in current chapter, go to next chapter
+    if (readerStore.currentChapterIndex < readerStore.toc.length - 1) {
+      console.log('Moving to next chapter')
+      readerStore.loadChapter(readerStore.currentChapterIndex + 1)
+      // 自动滚动到顶部
+      scrollToTop()
+    } else {
+      console.log('Already at the last chapter')
+    }
   }
 }
 

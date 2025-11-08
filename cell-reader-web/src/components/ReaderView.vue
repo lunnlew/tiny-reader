@@ -1,11 +1,11 @@
 <template>
-  <div class="reader-container">
+  <div class="reader-container" ref="containerRef">
     <div class="reader-content" v-html="processedContent"></div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, watch, nextTick, computed } from 'vue';
+import { onMounted, onUnmounted, watch, nextTick, computed, ref } from 'vue';
 import { useSettingsStore } from '../stores/settings';
 import { useReaderStore } from '../stores/reader';
 
@@ -15,14 +15,15 @@ const props = defineProps({
 
 const settingsStore = useSettingsStore();
 const readerStore = useReaderStore();
+const containerRef = ref(null);
 
 // Process content to handle paragraphs and apply paragraph spacing
 const processedContent = computed(() => {
   if (!props.content) return '';
-  
+
   // Split content into paragraphs using multiple newlines as separators
   const paragraphs = props.content.split(/\n\s*\n/);
-  
+
   // Wrap each paragraph in a div with appropriate spacing
   return paragraphs
     .map(paragraph => {
@@ -30,7 +31,7 @@ const processedContent = computed(() => {
       const cleanParagraph = paragraph
         .replace(/^\s+|\s+$/g, '') // trim leading/trailing whitespace
         .replace(/\n/g, '<br>'); // convert single newlines to <br> tags
-      
+
       if (cleanParagraph) {
         return `<div class="paragraph">${cleanParagraph}</div>`;
       }
@@ -96,7 +97,7 @@ autoScrollEnabledWatcher = watch(
     if (settingsStore.showSettings) {
       return;
     }
-    
+
     // 设置面板未显示时，根据设置状态控制自动滚动
     if (isEnabled && !isAutoScrolling) {
       // 如果启用自动滚动且当前未在滚动，则开始滚动
@@ -114,12 +115,14 @@ onMounted(() => {
   applySettings();
 
   // 监听自动滚动开关事件
-  const readerContainer = document.querySelector('.reader-container');
+  const readerContainer = containerRef.value;
   if (readerContainer) {
     readerContainer.addEventListener('autoScrollToggled', handleAutoScrollToggle);
 
     // 监听用户手动滚动，暂停自动滚动
     readerContainer.addEventListener('scroll', handleManualScroll);
+
+    // Space key handling is now managed in parent components
   }
 
   // 初始化自动滚动状态
@@ -138,10 +141,11 @@ onUnmounted(() => {
   }
 
   // 移除事件监听器
-  const readerContainer = document.querySelector('.reader-container');
+  const readerContainer = containerRef.value;
   if (readerContainer) {
     readerContainer.removeEventListener('autoScrollToggled', handleAutoScrollToggle);
     readerContainer.removeEventListener('scroll', handleManualScroll);
+    // No space key listener to remove
   }
 
   // 停止自动滚动
@@ -154,7 +158,7 @@ function handleAutoScrollToggle(event) {
   if (settingsStore.showSettings) {
     return;
   }
-  
+
   if (event.detail.enabled) {
     startAutoScroll();
   } else {
@@ -168,7 +172,7 @@ function handleManualScroll() {
   if (settingsStore.showSettings) {
     return;
   }
-  
+
   // 只有当滚动不是程序触发的，才暂停自动滚动
   if (!isAutoScrolling && settingsStore.isAutoScrollEnabled) {
     if (settingsStore.isAutoScrollEnabled && !isScrollViewAtBottom(document.querySelector('.reader-container'))) {
@@ -254,6 +258,8 @@ function isScrollViewAtBottom(container) {
   return container.scrollHeight - container.scrollTop <= container.clientHeight + 10; // 10px 容差
 }
 
+
+
 // 处理自动翻页
 async function handleAutoPagination() {
   if (readerStore.currentChapterIndex < readerStore.toc.length - 1) {
@@ -314,7 +320,7 @@ function applySettings() {
       readerContent.style.hyphens = 'auto';
     }
   }
-  
+
   // Also update paragraph spacing for all paragraph elements
   const paragraphs = document.querySelectorAll('.paragraph');
   paragraphs.forEach(paragraph => {
@@ -398,8 +404,10 @@ function applySettings() {
 }
 
 .paragraph {
-  margin-bottom: 1.2em; /* Default spacing, will be overridden by JS */
+  margin-bottom: 1.2em;
+  /* Default spacing, will be overridden by JS */
   line-height: inherit;
-  text-indent: 0; /* Remove any text indentation for paragraphs */
+  text-indent: 0;
+  /* Remove any text indentation for paragraphs */
 }
 </style>
