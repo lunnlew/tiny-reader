@@ -196,24 +196,18 @@ function handleKeyboard(e) {
     return
   }
 
-  switch (e.key) {
-    case 'ArrowLeft':
-      e.preventDefault()
-      prevChapter()
-      break
-    case 'ArrowRight':
-      e.preventDefault()
-      nextChapter()
-      break
-    case 'PageUp':
-      e.preventDefault()
-      prevChapter()
-      break
-    case 'PageDown':
-    case ' ':
-      e.preventDefault()
-      nextChapter()
-      break
+  // Check if the pressed key matches any of the configured next chapter keys
+  if (settingsStore.keyBindings.nextChapter.includes(e.key)) {
+    e.preventDefault()
+    nextChapter()
+    return
+  }
+
+  // Check if the pressed key matches any of the configured previous chapter keys
+  if (settingsStore.keyBindings.prevChapter.includes(e.key)) {
+    e.preventDefault()
+    prevChapter()
+    return
   }
 }
 

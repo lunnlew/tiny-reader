@@ -27,6 +27,12 @@ export const useSettingsStore = defineStore('settings', {
     
     // 其他阅读设置
     fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",  // 字体族
+    
+    // 键盘快捷键设置
+    keyBindings: {
+      nextChapter: ['ArrowRight', 'PageDown', ' '],  // 下一章键，默认为右箭头、PageDown、空格
+      prevChapter: ['ArrowLeft', 'PageUp']          // 上一章键，默认为左箭头、PageUp
+    }
   }),
   
   actions: {
@@ -78,12 +84,48 @@ export const useSettingsStore = defineStore('settings', {
     reset() {
       this.$reset()
       this.applyTheme()
+    },
+    
+    // 更新下一章键绑定
+    updateNextChapterKey(newKeys) {
+      if (Array.isArray(newKeys)) {
+        this.keyBindings.nextChapter = newKeys
+      } else {
+        this.keyBindings.nextChapter = [newKeys]
+      }
+    },
+    
+    // 更新上一章键绑定
+    updatePrevChapterKey(newKeys) {
+      if (Array.isArray(newKeys)) {
+        this.keyBindings.prevChapter = newKeys
+      } else {
+        this.keyBindings.prevChapter = [newKeys]
+      }
+    },
+    
+    // 添加键绑定
+    addKeyBinding(action, key) {
+      if (action === 'nextChapter' && !this.keyBindings.nextChapter.includes(key)) {
+        this.keyBindings.nextChapter.push(key)
+      } else if (action === 'prevChapter' && !this.keyBindings.prevChapter.includes(key)) {
+        this.keyBindings.prevChapter.push(key)
+      }
+    },
+    
+    // 移除键绑定
+    removeKeyBinding(action, key) {
+      if (action === 'nextChapter') {
+        this.keyBindings.nextChapter = this.keyBindings.nextChapter.filter(k => k !== key)
+      } else if (action === 'prevChapter') {
+        this.keyBindings.prevChapter = this.keyBindings.prevChapter.filter(k => k !== key)
+      }
     }
   },
 
   persist: {
     key: 'reader-settings',
     storage: localStorage,
-    paths: ['theme', 'fontSize', 'lineHeight', 'maxWidth', 'isTocVisible']
+    paths: ['theme', 'fontSize', 'lineHeight', 'maxWidth', 'isTocVisible', 'keyBindings']
   }
 })

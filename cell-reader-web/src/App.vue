@@ -16,14 +16,12 @@ import FileLoader from './components/FileLoader.vue';
 import MobileFileLoader from './components/MobileFileLoader.vue';
 import SettingsModal from './components/SettingsModal.vue';
 import { useSettingsStore } from './stores/settings';
+import { useIsMobile } from './utils/deviceDetection';
 
 const settingsStore = useSettingsStore();
 
 // Check if device is mobile
-const isMobile = computed(() => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-    window.innerWidth <= 768;
-})
+const isMobile = useIsMobile();
 
 onMounted(() => {
   console.log('App component mounted, ready to load files');
