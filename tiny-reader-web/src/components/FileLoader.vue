@@ -217,9 +217,9 @@ function scrollToNextPage() {
 }
 
 // Next chapter handler (with pagination within chapter)
-function nextChapter() {
+function nextChapter(type) {
   // First check if we can scroll more within the current chapter
-  if (canScrollCurrentChapter()) {
+  if (type !=1 && canScrollCurrentChapter()) {
     scrollToNextPage();
   } else {
     // If no more to scroll in current chapter, go to next chapter
@@ -235,8 +235,8 @@ function nextChapter() {
 }
 
 // Previous chapter handler
-function prevChapter() {
-  if (readerStore.currentChapterIndex > 0) {
+function prevChapter(type) {
+  if (type !=1 && readerStore.currentChapterIndex > 0) {
     console.log('Moving to previous chapter')
     readerStore.loadChapter(readerStore.currentChapterIndex - 1)
     // 自动滚动到顶部

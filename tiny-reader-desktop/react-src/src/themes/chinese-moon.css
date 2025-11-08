@@ -1,0 +1,27 @@
+/* Chinese Moon Theme Variables */
+:root[data-theme="chinese-moon"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #edf2ff;
+  --text-primary: #1e3a8a;
+  --text-secondary: #3730a3;
+  --border-color: #bfdbfe;
+  --accent-color: #3b82f6;
+  --accent-hover: #2563eb;
+  --drop-zone-bg: #edf2ff;
+  --drop-zone-border: #bfdbfe;
+  --drop-zone-hover: #dbeafe;
+  --drop-zone-drag-over: #bfdbfe;
+  --toc-bg: #edf2ff;
+  --toc-item-color: #3730a3;
+  --toc-item-hover: #3b82f6;
+  --toc-item-hover-bg: #dbeafe;
+  --toc-item-active: #3b82f6;
+  --toc-item-active-bg: #dbeafe;
+  --button-bg: #3b82f6;
+  --button-hover: #2563eb;
+  --reader-content-bg: #edf2ff;
+  --reader-content-color: #1e3a8a;
+  --scrollbar-track: #dbeafe;
+  --scrollbar-thumb: #bfdbfe;
+  --scrollbar-thumb-hover: #93c5fd;
+}

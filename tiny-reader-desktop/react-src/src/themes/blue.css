@@ -1,0 +1,27 @@
+/* Blue Theme Variables */
+:root[data-theme="blue"] {
+  --bg-primary: #e6f0ff;
+  --bg-secondary: #f0f7ff;
+  --text-primary: #1e3a8a;
+  --text-secondary: #3730a3;
+  --border-color: #93c5fd;
+  --accent-color: #2563eb;
+  --accent-hover: #3b82f6;
+  --drop-zone-bg: #f0f7ff;
+  --drop-zone-border: #93c5fd;
+  --drop-zone-hover: #dbeafe;
+  --drop-zone-drag-over: #bfdbfe;
+  --toc-bg: #f0f7ff;
+  --toc-item-color: #3730a3;
+  --toc-item-hover: #2563eb;
+  --toc-item-hover-bg: #dbeafe;
+  --toc-item-active: #2563eb;
+  --toc-item-active-bg: #dbeafe;
+  --button-bg: #2563eb;
+  --button-hover: #3b82f6;
+  --reader-content-bg: #f0f7ff;
+  --reader-content-color: #1e40af;
+  --scrollbar-track: #dbeafe;
+  --scrollbar-thumb: #93c5fd;
+  --scrollbar-thumb-hover: #60a5fa;
+}

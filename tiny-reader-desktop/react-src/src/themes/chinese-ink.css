@@ -1,0 +1,27 @@
+/* Chinese Ink Theme Variables */
+:root[data-theme="chinese-ink"] {
+  --bg-primary: #f8f9fa;
+  --bg-secondary: #e9ecef;
+  --text-primary: #212529;
+  --text-secondary: #495057;
+  --border-color: #ced4da;
+  --accent-color: #495057;
+  --accent-hover: #212529;
+  --drop-zone-bg: #e9ecef;
+  --drop-zone-border: #ced4da;
+  --drop-zone-hover: #dee2e6;
+  --drop-zone-drag-over: #ced4da;
+  --toc-bg: #e9ecef;
+  --toc-item-color: #495057;
+  --toc-item-hover: #495057;
+  --toc-item-hover-bg: #dee2e6;
+  --toc-item-active: #495057;
+  --toc-item-active-bg: #dee2e6;
+  --button-bg: #495057;
+  --button-hover: #212529;
+  --reader-content-bg: #e9ecef;
+  --reader-content-color: #212529;
+  --scrollbar-track: #dee2e6;
+  --scrollbar-thumb: #adb5bd;
+  --scrollbar-thumb-hover: #6c757d;
+}

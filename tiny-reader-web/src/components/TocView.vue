@@ -2,8 +2,7 @@
   <div class="toc-container">
     <ul class="toc-list">
       <li v-for="(item, i) in toc" :key="i" @click="jumpToChapter(item, i)"
-        :class="{ 'active-chapter': i === activeIndex }" class="toc-item"
-        :ref="el => setItemRef(el, i)">
+        :class="{ 'active-chapter': i === activeIndex }" class="toc-item" :ref="el => setItemRef(el, i)">
         {{ item.title }}
       </li>
     </ul>
@@ -11,7 +10,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, watch } from 'vue';
+import { ref, nextTick, watch, onMounted } from 'vue';
 
 const props = defineProps({
   toc: Array,
@@ -26,8 +25,6 @@ console.log('currentChapterIndex', props.currentChapterIndex)
 const emit = defineEmits(['jump'])
 const activeIndex = ref(-1)
 const itemRefs = ref({})
-let hasUserInteracted = false
-let isInitialLoad = true
 
 // Set up refs for list items
 function setItemRef(el, index) {
@@ -36,30 +33,26 @@ function setItemRef(el, index) {
   }
 }
 
-// Update active chapter when clicked - this means user has interacted, so disable auto-scroll
+// Update active chapter when clicked
 function jumpToChapter(item, index) {
   activeIndex.value = index
-  hasUserInteracted = true  // Use let variable, not ref, so it persists
-  isInitialLoad = false
   emit('jump', index)
 }
 
-// Watch for changes to currentChapterIndex prop to update active index (but not necessarily scroll)
+// Watch for changes to currentChapterIndex prop to update active index and scroll
 watch(() => props.currentChapterIndex, async (newIndex) => {
   if (newIndex >= 0) {
     activeIndex.value = newIndex;
-    
-    // Skip scrolling on initial load, only scroll when user has interacted
-    if (hasUserInteracted) {
-      await nextTick();
-      const activeElement = itemRefs.value[newIndex];
-      if (activeElement && activeElement.scrollIntoView) {
-        activeElement.scrollIntoView({ 
-          behavior: 'auto', // Use 'auto' for immediate scroll instead of smooth
-          block: 'center',
-          inline: 'nearest'
-        });
-      }
+
+    // Always scroll to the current chapter when the index changes
+    await nextTick();
+    const activeElement = itemRefs.value[newIndex];
+    if (activeElement && activeElement.scrollIntoView) {
+      activeElement.scrollIntoView({
+        behavior: 'auto', // Use 'auto' for immediate scroll instead of smooth
+        block: 'center',
+        inline: 'nearest'
+      });
     }
   }
 }, { immediate: true });
@@ -71,8 +64,8 @@ function scrollToCurrentChapter() {
     nextTick(() => {
       const activeElement = itemRefs.value[props.currentChapterIndex];
       if (activeElement && activeElement.scrollIntoView) {
-        activeElement.scrollIntoView({ 
-          behavior: 'smooth', 
+        activeElement.scrollIntoView({
+          behavior: 'smooth',
           block: 'center',
           inline: 'nearest'
         });
@@ -91,10 +84,7 @@ function updateCurrentChapter(index) {
 // Expose functions to parent component
 defineExpose({
   scrollToCurrentChapter,
-  updateCurrentChapter,
-  resetUserInteraction: () => {
-    hasUserInteracted = false;
-  }
+  updateCurrentChapter
 })
 </script>
 

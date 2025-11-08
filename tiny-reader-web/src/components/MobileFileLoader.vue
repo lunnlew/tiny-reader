@@ -41,7 +41,8 @@
             </svg>
           </button>
           <button @click="triggerFileSelect" class="reload-file-btn" title="选择新文件">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="17 8 12 3 7 8"></polyline>
               <line x1="12" y1="3" x2="12" y2="15"></line>
@@ -331,7 +332,7 @@ function jumpToChapter(index) {
 function canScrollCurrentChapter() {
   const readerContainer = document.querySelector('.reader-container');
   if (!readerContainer) return false;
-  
+
   // Check if we're not at the bottom of the content
   const maxScroll = readerContainer.scrollHeight - readerContainer.clientHeight;
   return readerContainer.scrollTop < maxScroll - 5; // 5px tolerance
@@ -341,21 +342,21 @@ function canScrollCurrentChapter() {
 function scrollToNextPage() {
   const readerContainer = document.querySelector('.reader-container');
   if (!readerContainer) return;
-  
+
   const viewportHeight = readerContainer.clientHeight;
   const currentScrollTop = readerContainer.scrollTop;
   const maxScroll = readerContainer.scrollHeight - readerContainer.clientHeight;
-  
+
   // Calculate next page position (scroll 90% of viewport)
   const nextPagePosition = Math.min(currentScrollTop + viewportHeight * 0.9, maxScroll);
-  
+
   readerContainer.scrollTop = nextPagePosition;
 }
 
 // Next chapter handler (with pagination within chapter)
-function nextChapter() {
+function nextChapter(type) {
   // First check if we can scroll more within the current chapter
-  if (canScrollCurrentChapter()) {
+  if (type != 1 && canScrollCurrentChapter()) {
     scrollToNextPage();
   } else {
     // If no more to scroll in current chapter, go to next chapter
@@ -371,8 +372,8 @@ function nextChapter() {
 }
 
 // Previous chapter handler
-function prevChapter() {
-  if (readerStore.currentChapterIndex > 0) {
+function prevChapter(type) {
+  if (type != 1 && readerStore.currentChapterIndex > 0) {
     console.log('Moving to previous chapter')
     readerStore.loadChapter(readerStore.currentChapterIndex - 1)
     // 自动滚动到顶部

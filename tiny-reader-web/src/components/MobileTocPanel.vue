@@ -63,8 +63,6 @@ watch(() => props.showMobileToc, async (newVal) => {
         }
 
         if (shouldScroll) {
-          // Reset interaction flag to allow scrolling
-          tocViewRef.value.resetUserInteraction();
           // Scroll to current chapter
           tocViewRef.value.scrollToCurrentChapter();
         }

@@ -1,0 +1,27 @@
+/* Sepia Theme Variables */
+:root[data-theme="sepia"] {
+  --bg-primary: #f4f1ea;
+  --bg-secondary: #f8f5ee;
+  --text-primary: #5c4d42;
+  --text-secondary: #8b7d70;
+  --border-color: #d6c9b8;
+  --accent-color: #a88b66;
+  --accent-hover: #8a6f51;
+  --drop-zone-bg: #f8f5ee;
+  --drop-zone-border: #d6c9b8;
+  --drop-zone-hover: #f0e8dd;
+  --drop-zone-drag-over: #e8e0d5;
+  --toc-bg: #f8f5ee;
+  --toc-item-color: #8b7d70;
+  --toc-item-hover: #a88b66;
+  --toc-item-hover-bg: #f0e8dd;
+  --toc-item-active: #a88b66;
+  --toc-item-active-bg: #e8e0d5;
+  --button-bg: #a88b66;
+  --button-hover: #8a6f51;
+  --reader-content-bg: #f8f5ee;
+  --reader-content-color: #5c4d42;
+  --scrollbar-track: #e8e0d5;
+  --scrollbar-thumb: #d6c9b8;
+  --scrollbar-thumb-hover: #b9a994;
+}

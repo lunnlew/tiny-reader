@@ -1,0 +1,27 @@
+/* Chinese Red Theme Variables */
+:root[data-theme="chinese-red"] {
+  --bg-primary: #fff1f0;
+  --bg-secondary: #ffeaea;
+  --text-primary: #7c2d12;
+  --text-secondary: #9a3412;
+  --border-color: #fecaca;
+  --accent-color: #dc2626;
+  --accent-hover: #b91c1c;
+  --drop-zone-bg: #ffeaea;
+  --drop-zone-border: #fecaca;
+  --drop-zone-hover: #fed7d7;
+  --drop-zone-drag-over: #fecaca;
+  --toc-bg: #ffeaea;
+  --toc-item-color: #9a3412;
+  --toc-item-hover: #dc2626;
+  --toc-item-hover-bg: #fed7d7;
+  --toc-item-active: #dc2626;
+  --toc-item-active-bg: #fed7d7;
+  --button-bg: #dc2626;
+  --button-hover: #b91c1c;
+  --reader-content-bg: #ffeaea;
+  --reader-content-color: #7c2d12;
+  --scrollbar-track: #fed7d7;
+  --scrollbar-thumb: #fecaca;
+  --scrollbar-thumb-hover: #fca5a5;
+}

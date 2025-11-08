@@ -64,7 +64,6 @@ function onToggleAutoScroll() {
 .auto-controls {
   display: flex;
   gap: 1rem;
-  margin-left: 1.5rem;
   align-items: center;
 }
 
