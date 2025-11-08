@@ -1,11 +1,11 @@
 <template>
   <div class="reader-container">
-    <pre class="reader-content">{{ content }}</pre>
+    <div class="reader-content" v-html="processedContent"></div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { onMounted, onUnmounted, watch, nextTick, computed } from 'vue';
 import { useSettingsStore } from '../stores/settings';
 import { useReaderStore } from '../stores/reader';
 
@@ -15,6 +15,30 @@ const props = defineProps({
 
 const settingsStore = useSettingsStore();
 const readerStore = useReaderStore();
+
+// Process content to handle paragraphs and apply paragraph spacing
+const processedContent = computed(() => {
+  if (!props.content) return '';
+  
+  // Split content into paragraphs using multiple newlines as separators
+  const paragraphs = props.content.split(/\n\s*\n/);
+  
+  // Wrap each paragraph in a div with appropriate spacing
+  return paragraphs
+    .map(paragraph => {
+      // Clean up each paragraph - remove extra whitespace but preserve meaningful spaces
+      const cleanParagraph = paragraph
+        .replace(/^\s+|\s+$/g, '') // trim leading/trailing whitespace
+        .replace(/\n/g, '<br>'); // convert single newlines to <br> tags
+      
+      if (cleanParagraph) {
+        return `<div class="paragraph">${cleanParagraph}</div>`;
+      }
+      return '';
+    })
+    .filter(p => p) // Remove empty paragraphs
+    .join('');
+});
 
 // 自动滚动相关变量
 let autoScrollInterval = null;
@@ -27,6 +51,18 @@ const stopWatching = watch(
     applySettings();
   },
   { deep: true }
+);
+
+// Specifically watch paragraph spacing changes to update paragraph spacing
+const stopParagraphSpacingWatching = watch(
+  () => settingsStore.paragraphSpacing,
+  () => {
+    // Update paragraph spacing when the setting changes
+    const paragraphs = document.querySelectorAll('.paragraph');
+    paragraphs.forEach(paragraph => {
+      paragraph.style.marginBottom = `${settingsStore.paragraphSpacing * 1.2}em`;
+    });
+  }
 );
 
 let autoScrollEnabledWatcher;
@@ -96,6 +132,7 @@ onUnmounted(() => {
   // 组件卸载时停止监听
   stopWatching();
   stopSettingsWatching();
+  stopParagraphSpacingWatching();
   if (autoScrollEnabledWatcher) {
     autoScrollEnabledWatcher();
   }
@@ -277,6 +314,12 @@ function applySettings() {
       readerContent.style.hyphens = 'auto';
     }
   }
+  
+  // Also update paragraph spacing for all paragraph elements
+  const paragraphs = document.querySelectorAll('.paragraph');
+  paragraphs.forEach(paragraph => {
+    paragraph.style.marginBottom = `${settingsStore.paragraphSpacing * 1.2}em`;
+  });
 }
 </script>
 
@@ -334,7 +377,6 @@ function applySettings() {
   /* 这会被applySettings覆盖 */
   letter-spacing: 0px;
   /* 这会被applySettings覆盖 */
-  white-space: pre-wrap;
   word-wrap: break-word;
   color: var(--reader-content-color, #374151);
   margin: 0 auto;
@@ -353,5 +395,11 @@ function applySettings() {
   /* 默认左对齐，动态设置 */
   hyphens: auto;
   /* 默认启用连字符，动态设置 */
+}
+
+.paragraph {
+  margin-bottom: 1.2em; /* Default spacing, will be overridden by JS */
+  line-height: inherit;
+  text-indent: 0; /* Remove any text indentation for paragraphs */
 }
 </style>

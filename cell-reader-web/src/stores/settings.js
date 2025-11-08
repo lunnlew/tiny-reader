@@ -36,7 +36,10 @@ export const useSettingsStore = defineStore('settings', {
     },
     
     // 全屏模式
-    isFullscreen: false
+    isFullscreen: false,
+    
+    // 段间距设置
+    paragraphSpacing: 1.0  // 段间距倍数，默认为1.0（即正常间距）
   }),
   
   actions: {
@@ -144,6 +147,6 @@ export const useSettingsStore = defineStore('settings', {
   persist: {
     key: 'reader-settings',
     storage: localStorage,
-    paths: ['theme', 'fontSize', 'lineHeight', 'maxWidth', 'isTocVisible', 'keyBindings', 'isFullscreen']
+    paths: ['theme', 'fontSize', 'lineHeight', 'maxWidth', 'isTocVisible', 'keyBindings', 'isFullscreen', 'paragraphSpacing']
   }
 })

@@ -150,6 +150,23 @@
           </div>
         </div>
         
+        <!-- 段间距设置 -->
+        <div class="setting-group">
+          <h3>段间距</h3>
+          <div class="slider-container">
+            <input 
+              type="range" 
+              min="0.5" 
+              max="3.0" 
+              step="0.1" 
+              v-model="settingsStore.paragraphSpacing" 
+              class="slider"
+            />
+            <span class="slider-value">{{ settingsStore.paragraphSpacing.toFixed(1) }}倍</span>
+          </div>
+          <p class="setting-description">设置段落之间的间距大小</p>
+        </div>
+        
         <!-- 键盘快捷键设置 - 仅在桌面端显示 -->
         <div v-if="!isMobile" class="setting-group">
           <h3>键盘快捷键</h3>
@@ -707,6 +724,13 @@ function clearKeys(action) {
   margin-left: 1.5rem;
   padding-top: 0.5rem;
   border-top: 1px solid var(--border-color, #e5e7eb);
+}
+
+.setting-description {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #6b7280);
+  line-height: 1.4;
 }
 
 .key-binding-group {
