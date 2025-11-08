@@ -826,7 +826,7 @@ function updateAutoPaginationEnabled(value) {
 .speed-value {
   font-size: 0.75rem;
   color: var(--text-secondary, #6b7280);
-  min-width: 50px;
+  min-width: 30px;
   text-align: left;
 }
 

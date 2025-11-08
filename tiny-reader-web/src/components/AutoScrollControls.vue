@@ -10,7 +10,7 @@
         v-model.number="autoScrollSpeed" min="10" max="200" step="10" class="speed-slider"
         title="滚动速度" />
       <span v-if="autoScrollEnabled" class="speed-value">
-        {{ autoScrollSpeed }} px/s
+        {{ autoScrollSpeed }}
       </span>
     </div>
 
@@ -101,7 +101,7 @@ function onToggleAutoScroll() {
 .speed-value {
   font-size: 0.75rem;
   color: var(--text-secondary, #6b7280);
-  min-width: 50px;
+  min-width: 30px;
   text-align: left;
 }
 </style>

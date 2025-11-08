@@ -51,7 +51,7 @@ const AutoScrollControls = ({
               title="滚动速度"
             />
             <span className="speed-value">
-              {autoScrollSpeed} px/s
+              {autoScrollSpeed}
             </span>
           </>
         )}

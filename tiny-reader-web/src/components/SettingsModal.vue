@@ -132,7 +132,7 @@
                 v-model.number="settingsStore.autoScrollSpeed" 
                 class="slider"
               />
-              <span class="slider-value">{{ settingsStore.autoScrollSpeed }} px/s</span>
+              <span class="slider-value">{{ settingsStore.autoScrollSpeed }}</span>
             </div>
           </div>
         </div>

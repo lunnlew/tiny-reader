@@ -302,7 +302,7 @@ const SettingsModal = () => {
                     onChange={(e) => settingsStore.setAutoScrollSpeed(parseInt(e.target.value))}
                     className="slider"
                   />
-                  <span className="slider-value">{settingsStore.autoScrollSpeed} px/s</span>
+                  <span className="slider-value">{settingsStore.autoScrollSpeed}</span>
                 </div>
               </div>
             )}
