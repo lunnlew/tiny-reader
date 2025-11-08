@@ -672,7 +672,8 @@ function updateAutoPaginationEnabled(value) {
 }
 
 .reload-file-btn:hover {
-  transform: rotate(90deg);
+  background-color: var(--border-color, #d1d5db);
+  color: var(--accent-color, #4f46e5);
 }
 
 .large-file-notification {
