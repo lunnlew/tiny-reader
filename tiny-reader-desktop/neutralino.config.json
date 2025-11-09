@@ -6,6 +6,7 @@
   "url": "/",
   "enableServer": true,
   "enableNativeAPI": true,
+  "production": false,
   "nativeAllowList": [
     "app.*",
     "app.exit",
