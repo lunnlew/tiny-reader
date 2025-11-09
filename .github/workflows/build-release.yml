@@ -91,21 +91,12 @@ jobs:
         cd tiny-reader-desktop
         npx neu build
 
-    - name: List build output
-      if: success()
-      run: |
-        cd tiny-reader-desktop
-        echo "Listing dist directory contents:"
-        ls -la dist/
-        echo "Listing all files in dist recursively:"
-        find dist/ -type f
-
     - name: Upload build artifacts
       if: success()
       uses: actions/upload-artifact@v4
       with:
         name: app-build-${{ matrix.os }}
-        path: tiny-reader-desktop/dist/*
+        path: tiny-reader-desktop/dist/**
 
   # Separate release job to collect all platform artifacts and create a single release
   release:
