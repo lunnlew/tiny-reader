@@ -84,6 +84,16 @@ const FileLoader = ({ isMobile = false }) => {
     }
   };
 
+  // 跳转到顶部
+  const scrollToTop = useCallback(() => {
+    setTimeout(() => {
+      const readerContainer = document.querySelector('.reader-container');
+      if (readerContainer) {
+        readerContainer.scrollTop = 0;
+      }
+    }, 0);
+  }, []);
+
   // Navigate to a specific chapter from TOC
   const jumpToChapter = (index) => {
     console.log(`Jumping to chapter at index ${index}: "${readerStore.toc[index].title}"`);
@@ -145,17 +155,7 @@ const FileLoader = ({ isMobile = false }) => {
     } else {
       console.log('Already at the first chapter');
     }
-  }, [readerStore.currentChapterIndex, readerStore.loadChapter, scrollToTop]);
-
-  // 跳转到顶部
-  const scrollToTop = useCallback(() => {
-    setTimeout(() => {
-      const readerContainer = document.querySelector('.reader-container');
-      if (readerContainer) {
-        readerContainer.scrollTop = 0;
-      }
-    }, 0);
-  }, []);
+  }, [readerStore, scrollToTop]);
 
   // 处理自动滚动开关
   const toggleAutoScroll = () => {

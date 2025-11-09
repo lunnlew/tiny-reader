@@ -98,9 +98,20 @@ const ReaderView = ({ content }) => {
   }, [readerStore.currentChapterIndex]);
 
   // 检查滚动视图是否在底部
-  const isScrollViewAtBottom = (container) => {
+  const isScrollViewAtBottom = useCallback((container) => {
     return container.scrollHeight - container.scrollTop <= container.clientHeight + 10; // 10px 容差
-  };
+  }, []);
+
+  // 停止自动滚动
+  const stopAutoScroll = useCallback(() => {
+    if (autoScrollInterval.current) {
+      cancelAnimationFrame(autoScrollInterval.current);
+      autoScrollInterval.current = null;
+    }
+    isAutoScrolling.current = false;
+  }, [autoScrollInterval, isAutoScrolling]);
+
+
 
   // 开始自动滚动
   const startAutoScroll = useCallback(() => {
@@ -166,19 +177,7 @@ const ReaderView = ({ content }) => {
 
     autoScrollInterval.current = requestAnimationFrame(animateScroll);
     isAutoScrolling.current = true;
-  }, [settingsStore.isAutoScrollEnabled, settingsStore.isAutoPaginationEnabled, 
-      settingsStore.autoScrollSpeed, isScrollViewAtBottom]);
-
-  // 停止自动滚动
-  const stopAutoScroll = () => {
-    if (autoScrollInterval.current) {
-      cancelAnimationFrame(autoScrollInterval.current);
-      autoScrollInterval.current = null;
-    }
-    isAutoScrolling.current = false;
-  };
-
-
+  }, [settingsStore, isScrollViewAtBottom, stopAutoScroll]);
 
   // 处理自动翻页
   const handleAutoPaginationRef = useRef();
@@ -254,8 +253,7 @@ const ReaderView = ({ content }) => {
         stopAutoScroll();
       };
     }
-  }, [settingsStore.isAutoScrollEnabled, settingsStore.isAutoPaginationEnabled,
-  settingsStore.autoScrollSpeed, settingsStore.showSettings, startAutoScroll, handleManualScroll]);
+  }, [settingsStore, startAutoScroll, handleManualScroll, stopAutoScroll]);
 
   // 监听自动滚动设置变化
   useEffect(() => {
