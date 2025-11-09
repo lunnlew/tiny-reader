@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useSettingsStore } from '../stores/settingsStore';
 import { useReaderStore } from '../stores/readerStore';
 
@@ -42,7 +42,7 @@ const ReaderView = ({ content }) => {
   const isAutoScrolling = useRef(false);
 
   // 应用设置到DOM元素
-  const applySettings = () => {
+  const applySettings = useCallback(() => {
     const readerContent = document.querySelector('.reader-content');
     if (readerContent) {
       // 应用字体大小
@@ -83,13 +83,13 @@ const ReaderView = ({ content }) => {
     paragraphs.forEach(paragraph => {
       paragraph.style.marginBottom = `${settingsStore.paragraphSpacing * 1.2}em`;
     });
-  };
+  }, [settingsStore.fontSize, settingsStore.lineHeight, settingsStore.maxWidth,
+  settingsStore.letterSpacing, settingsStore.fontFamily, settingsStore.paragraphSpacing]);
 
   // 监听设置变化并应用
   useEffect(() => {
     applySettings();
-  }, [settingsStore.fontSize, settingsStore.lineHeight, settingsStore.maxWidth,
-  settingsStore.letterSpacing, settingsStore.fontFamily, settingsStore.paragraphSpacing]);
+  }, [applySettings]);
 
   const latestIndexRef = useRef(readerStore.currentChapterIndex);
 
@@ -98,7 +98,7 @@ const ReaderView = ({ content }) => {
   }, [readerStore.currentChapterIndex]);
 
   // 开始自动滚动
-  const startAutoScroll = () => {
+  const startAutoScroll = useCallback(() => {
     stopAutoScroll(); // 先停止当前的滚动（如果有的话）
 
     const readerContainer = document.querySelector('.reader-container');
@@ -161,7 +161,8 @@ const ReaderView = ({ content }) => {
 
     autoScrollInterval.current = requestAnimationFrame(animateScroll);
     isAutoScrolling.current = true;
-  };
+  }, [settingsStore.isAutoScrollEnabled, settingsStore.isAutoPaginationEnabled, 
+      settingsStore.autoScrollSpeed, isScrollViewAtBottom]);
 
   // 停止自动滚动
   const stopAutoScroll = () => {
@@ -206,7 +207,7 @@ const ReaderView = ({ content }) => {
   });
 
   // 处理手动滚动事件，暂停自动滚动
-  const handleManualScroll = () => {
+  const handleManualScroll = useCallback(() => {
     // 如果设置面板正在显示，则不处理手动滚动事件
     if (settingsStore.showSettings) {
       return;
@@ -218,7 +219,7 @@ const ReaderView = ({ content }) => {
         startAutoScroll();
       }
     }
-  };
+  }, [settingsStore.showSettings, settingsStore.isAutoScrollEnabled]);
 
   // 监听自动滚动开关事件
   useEffect(() => {
@@ -252,7 +253,7 @@ const ReaderView = ({ content }) => {
       };
     }
   }, [settingsStore.isAutoScrollEnabled, settingsStore.isAutoPaginationEnabled,
-  settingsStore.autoScrollSpeed, settingsStore.showSettings]);
+  settingsStore.autoScrollSpeed, settingsStore.showSettings, startAutoScroll, handleManualScroll]);
 
   // 监听自动滚动设置变化
   useEffect(() => {
@@ -282,7 +283,7 @@ const ReaderView = ({ content }) => {
         readerStore.wasAutoScrollPausedBySettings = false;
       }
     }
-  }, [settingsStore.isAutoScrollEnabled, settingsStore.showSettings]);
+  }, [settingsStore.isAutoScrollEnabled, settingsStore.showSettings, readerStore, startAutoScroll]);
 
   return (
     <div className="reader-container" ref={containerRef}>

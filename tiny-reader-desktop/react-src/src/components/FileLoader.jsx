@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { useReaderStore } from '../stores/readerStore';
 import { useSettingsStore } from '../stores/settingsStore';
 import FileDropZone from './FileDropZone';
@@ -27,7 +27,7 @@ const FileLoader = ({ isMobile = false }) => {
   };
 
   // 切换全屏模式
-  const toggleFullscreen = async () => {
+  const toggleFullscreen = useCallback(async () => {
     try {
       const isCurrentlyFullscreen = await Neutralino.window.isFullScreen();
 
@@ -41,7 +41,7 @@ const FileLoader = ({ isMobile = false }) => {
     } catch (error) {
       console.error('Failed to toggle fullscreen:', error);
     }
-  };
+  }, [settingsStore]);
 
   // Handle drag over event
   const handleDragOver = () => {
@@ -93,17 +93,17 @@ const FileLoader = ({ isMobile = false }) => {
   };
 
   // Check if current chapter content can be scrolled further
-  const canScrollCurrentChapter = () => {
+  const canScrollCurrentChapter = useCallback(() => {
     const readerContainer = document.querySelector('.reader-container');
     if (!readerContainer) return false;
 
     // Check if we're not at the bottom of the content
     const maxScroll = readerContainer.scrollHeight - readerContainer.clientHeight;
     return readerContainer.scrollTop < maxScroll - 5; // 5px tolerance
-  };
+  }, []);
 
   // Scroll to next page within current chapter
-  const scrollToNextPage = () => {
+  const scrollToNextPage = useCallback(() => {
     const readerContainer = document.querySelector('.reader-container');
     if (!readerContainer) return;
 
@@ -115,12 +115,12 @@ const FileLoader = ({ isMobile = false }) => {
     const nextPagePosition = Math.min(currentScrollTop + viewportHeight * 0.9, maxScroll);
 
     readerContainer.scrollTop = nextPagePosition;
-  };
+  }, []);
 
   // Next chapter handler (with pagination within chapter)
-  const nextChapter = (type) => {
+  const nextChapter = useCallback((type) => {
     // First check if we can scroll more within the current chapter
-    if (type != 1 && canScrollCurrentChapter()) {
+    if (type !== 1 && canScrollCurrentChapter()) {
       scrollToNextPage();
     } else {
       // If no more to scroll in current chapter, go to next chapter
@@ -133,11 +133,11 @@ const FileLoader = ({ isMobile = false }) => {
         console.log('Already at the last chapter');
       }
     }
-  };
+  }, [readerStore.currentChapterIndex, readerStore.toc, readerStore.loadChapter]);
 
   // Previous chapter handler
-  const prevChapter = (type) => {
-    if (type != 1 && readerStore.currentChapterIndex > 0) {
+  const prevChapter = useCallback((type) => {
+    if (type !== 1 && readerStore.currentChapterIndex > 0) {
       console.log('Moving to previous chapter');
       readerStore.loadChapter(readerStore.currentChapterIndex - 1);
       // 自动滚动到顶部
@@ -145,17 +145,17 @@ const FileLoader = ({ isMobile = false }) => {
     } else {
       console.log('Already at the first chapter');
     }
-  };
+  }, [readerStore.currentChapterIndex, readerStore.loadChapter]);
 
   // 跳转到顶部
-  const scrollToTop = () => {
+  const scrollToTop = useCallback(() => {
     setTimeout(() => {
       const readerContainer = document.querySelector('.reader-container');
       if (readerContainer) {
         readerContainer.scrollTop = 0;
       }
     }, 0);
-  };
+  }, []);
 
   // 处理自动滚动开关
   const toggleAutoScroll = () => {

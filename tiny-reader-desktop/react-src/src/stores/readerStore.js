@@ -284,7 +284,7 @@ export const useReaderStore = create((set, get) => ({
     // Updated regex to include more Chinese structural terms: 部、集、卷、章、回、节、册、篇、目
     // Capture both "第X[结构词]" and specific patterns like "卷X", "上册", "下册", etc.
     // Use alternation with specific ordering to avoid overlapping matches
-    const regex = /(第[一二三四五六七八九十百千万零\d]+[部集卷章回节册篇目]|(卷|册|篇)[一二三四五六七八九十百千万零\d\s、\-.：:\-]+章?|上[册卷]|下[册卷]|[上下]篇|Chapter\s+\d+|番外[一二三四五六七八九十百千万零\d\s]*篇?|外传|后记|尾声|终章|楔子|序章|引子)/i;
+    const regex = /(第[一二三四五六七八九十百千万零\d]+[部集卷章回节册篇目]|(卷|册|篇)[一二三四五六七八九十百千万零\d\s、\-.：:-]+章?|上[册卷]|下[册卷]|[上下]篇|Chapter\s+\d+|番外[一二三四五六七八九十百千万零\d\s]*篇?|外传|后记|尾声|终章|楔子|序章|引子)/i;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];

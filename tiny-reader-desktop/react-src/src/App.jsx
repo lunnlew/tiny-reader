@@ -61,7 +61,7 @@ function App() {
       window.removeEventListener('neutralinoOpenFileLoading', handleLoadingEvent);
       window.removeEventListener('neutralinoMenuSettings', handleSettingsEvent);
     };
-  }, []);
+  }, [readerStore, settingsStore]);
 
   // Apply theme when component mounts
   useEffect(() => {

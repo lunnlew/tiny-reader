@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useSettingsStore } from '../stores/settingsStore';
 
 const SettingsModal = () => {
@@ -49,7 +49,7 @@ const SettingsModal = () => {
   };
 
   // 捕获按键
-  const captureKey = (action, event) => {
+  const captureKey = useCallback((action, event) => {
     event.preventDefault();
 
     // Get the key that was pressed
@@ -79,7 +79,7 @@ const SettingsModal = () => {
     }
 
     setIsCapturing(null);
-  };
+  }, [settingsStore, settingsStore.keyBindings]);
 
   // 移除按键绑定
   const removeKey = (action, key) => {
@@ -155,7 +155,7 @@ const SettingsModal = () => {
     return () => {
       window.removeEventListener('keydown', handleGlobalKeyDown);
     };
-  }, [isCapturing]);
+  }, [isCapturing, captureKey]);
 
   return (
     <div className="settings-overlay" onClick={closeSettings}>
