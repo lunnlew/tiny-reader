@@ -93,26 +93,6 @@ jobs:
         name: app-build-${{ matrix.os }}
         path: tiny-reader-desktop/dist/*
 
-    - name: Notify on failure
-      if: failure()
-      uses: rtCamp/action-slack-notify@v2
-      env:
-        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        SLACK_TITLE: Build Failed
-        SLACK_MESSAGE: "Build failed for ${{ github.ref }} on ${{ matrix.os }}"
-        SLACK_COLOR: danger
-        SLACK_USERNAME: GitHub Actions Bot
-
-    - name: Notify on success
-      if: success() && startsWith(github.ref, 'refs/tags/v')
-      uses: rtCamp/action-slack-notify@v2
-      env:
-        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        SLACK_TITLE: Build Success
-        SLACK_MESSAGE: "Build succeeded for ${{ github.ref_name }} on ${{ matrix.os }}"
-        SLACK_COLOR: good
-        SLACK_USERNAME: GitHub Actions Bot
-
   # Separate release job to collect all platform artifacts and create a single release
   release:
     needs: build-and-release
