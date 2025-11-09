@@ -3,10 +3,13 @@ name: Build and Release App
 on:
   push:
     branches: [main]  # Adjust branch name as needed
+    tags: ['v*']      # Trigger on tag pushes matching v*
+  pull_request:
+    branches: [main]
   workflow_dispatch: # Allows manual triggering of the workflow
 
 jobs:
-  build:
+  build-and-release:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -15,6 +18,9 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -24,22 +30,74 @@ jobs:
     - name: Install dependencies
       run: |
         cd tiny-reader-desktop
-        npm install
+        npm ci
 
     - name: Install React dependencies
       run: |
         cd tiny-reader-desktop/react-src
-        npm install
+        npm ci
 
-    - name: Build React app
+    - name: Determine Environment
+      id: environment
+      run: |
+        if [[ ${{ github.ref }} == refs/tags/v* ]]; then
+          echo "ENVIRONMENT=production" >> $GITHUB_OUTPUT
+          echo "IS_RELEASE=true" >> $GITHUB_OUTPUT
+        elif [[ ${{ github.ref }} == refs/heads/main ]]; then
+          echo "ENVIRONMENT=staging" >> $GITHUB_OUTPUT
+          echo "IS_RELEASE=false" >> $GITHUB_OUTPUT
+        else
+          echo "ENVIRONMENT=development" >> $GITHUB_OUTPUT
+          echo "IS_RELEASE=false" >> $GITHUB_OUTPUT
+        fi
+      shell: bash
+
+    - name: Build React app for Production
+      if: steps.environment.outputs.ENVIRONMENT == 'production'
+      env:
+        REACT_APP_ENV: production
       run: |
         cd tiny-reader-desktop/react-src
         npm run build
+
+    - name: Build React app for Staging
+      if: steps.environment.outputs.ENVIRONMENT == 'staging'
+      env:
+        REACT_APP_ENV: staging
+      run: |
+        cd tiny-reader-desktop/react-src
+        npm run build
+
+    - name: Build React app for Development
+      if: steps.environment.outputs.ENVIRONMENT == 'development'
+      env:
+        REACT_APP_ENV: development
+      run: |
+        cd tiny-reader-desktop/react-src
+        CI=false npm run build
 
     - name: Install Neutralino CLI
       run: |
         cd tiny-reader-desktop
         npm install -g @neutralinojs/neu
+
+    - name: Configure Neutralino for Production
+      if: steps.environment.outputs.ENVIRONMENT == 'production'
+      run: |
+        cd tiny-reader-desktop
+        sed -i 's|"production": false|"production": true|g' neutralino.config.json
+
+    - name: Configure Neutralino for Staging
+      if: steps.environment.outputs.ENVIRONMENT == 'staging'
+      run: |
+        cd tiny-reader-desktop
+        sed -i 's|"production": false|"production": false|g' neutralino.config.json
+
+    - name: Configure Neutralino for Development
+      if: steps.environment.outputs.ENVIRONMENT == 'development'
+      run: |
+        cd tiny-reader-desktop
+        sed -i 's|"production": false|"production": false|g' neutralino.config.json
 
     - name: Build Neutralino app
       run: |
@@ -47,26 +105,51 @@ jobs:
         npx neu build
 
     - name: Upload build artifacts
+      if: success()
       uses: actions/upload-artifact@v4
       with:
         name: app-build-${{ matrix.os }}
         path: tiny-reader-desktop/dist/*
 
+    - name: Notify on failure
+      if: failure()
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        SLACK_TITLE: Build Failed
+        SLACK_MESSAGE: "Build failed for ${{ github.ref }} on ${{ matrix.os }}"
+        SLACK_COLOR: danger
+        SLACK_USERNAME: GitHub Actions Bot
+
+    - name: Notify on success
+      if: success() && startsWith(github.ref, 'refs/tags/v')
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        SLACK_TITLE: Build Success
+        SLACK_MESSAGE: "Build succeeded for ${{ github.ref_name }} on ${{ matrix.os }}"
+        SLACK_COLOR: good
+        SLACK_USERNAME: GitHub Actions Bot
+
+  # Separate release job to collect all platform artifacts and create a single release
   release:
-    needs: build
+    needs: build-and-release
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
-
     steps:
-    - name: Download all artifacts
+    - name: Download all platform artifacts
       uses: actions/download-artifact@v4
       with:
-        path: ./releases
+        path: ./release-assets
 
-    - name: Create GitHub Release
+    - name: Display structure of downloaded artifacts
+      run: ls -R
+      working-directory: ./release-assets
+
+    - name: Create GitHub Release with all platform assets
       uses: softprops/action-gh-release@v2
       with:
-        files: ./releases/**/*
+        files: ./release-assets/**
         name: Release ${{ github.ref_name }}
         tag_name: ${{ github.ref }}
         body: |
