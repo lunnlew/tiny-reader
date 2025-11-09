@@ -97,6 +97,11 @@ const ReaderView = ({ content }) => {
     latestIndexRef.current = readerStore.currentChapterIndex;
   }, [readerStore.currentChapterIndex]);
 
+  // 检查滚动视图是否在底部
+  const isScrollViewAtBottom = (container) => {
+    return container.scrollHeight - container.scrollTop <= container.clientHeight + 10; // 10px 容差
+  };
+
   // 开始自动滚动
   const startAutoScroll = useCallback(() => {
     stopAutoScroll(); // 先停止当前的滚动（如果有的话）
@@ -173,10 +178,7 @@ const ReaderView = ({ content }) => {
     isAutoScrolling.current = false;
   };
 
-  // 检查滚动视图是否在底部
-  const isScrollViewAtBottom = (container) => {
-    return container.scrollHeight - container.scrollTop <= container.clientHeight + 10; // 10px 容差
-  };
+
 
   // 处理自动翻页
   const handleAutoPaginationRef = useRef();
@@ -219,7 +221,7 @@ const ReaderView = ({ content }) => {
         startAutoScroll();
       }
     }
-  }, [settingsStore.showSettings, settingsStore.isAutoScrollEnabled]);
+  }, [settingsStore.showSettings, settingsStore.isAutoScrollEnabled, isScrollViewAtBottom, startAutoScroll]);
 
   // 监听自动滚动开关事件
   useEffect(() => {
@@ -283,7 +285,7 @@ const ReaderView = ({ content }) => {
         readerStore.wasAutoScrollPausedBySettings = false;
       }
     }
-  }, [settingsStore.isAutoScrollEnabled, settingsStore.showSettings, readerStore, startAutoScroll]);
+  }, [settingsStore.isAutoScrollEnabled, settingsStore.showSettings, readerStore, startAutoScroll, stopAutoScroll]);
 
   return (
     <div className="reader-container" ref={containerRef}>

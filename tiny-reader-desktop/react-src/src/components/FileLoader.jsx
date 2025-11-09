@@ -133,7 +133,7 @@ const FileLoader = ({ isMobile = false }) => {
         console.log('Already at the last chapter');
       }
     }
-  }, [readerStore.currentChapterIndex, readerStore.toc, readerStore.loadChapter]);
+  }, [canScrollCurrentChapter, readerStore, scrollToNextPage, scrollToTop]);
 
   // Previous chapter handler
   const prevChapter = useCallback((type) => {
@@ -145,7 +145,7 @@ const FileLoader = ({ isMobile = false }) => {
     } else {
       console.log('Already at the first chapter');
     }
-  }, [readerStore.currentChapterIndex, readerStore.loadChapter]);
+  }, [readerStore.currentChapterIndex, readerStore.loadChapter, scrollToTop]);
 
   // 跳转到顶部
   const scrollToTop = useCallback(() => {
@@ -192,7 +192,7 @@ const FileLoader = ({ isMobile = false }) => {
   // Load cached data on component mount
   useEffect(() => {
     readerStore.loadFromCache();
-  }, []);
+  }, [readerStore]);
 
 
   // 处理键盘事件

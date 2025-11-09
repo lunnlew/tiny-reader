@@ -79,7 +79,7 @@ const SettingsModal = () => {
     }
 
     setIsCapturing(null);
-  }, [settingsStore, settingsStore.keyBindings]);
+  }, [settingsStore]);
 
   // 移除按键绑定
   const removeKey = (action, key) => {
