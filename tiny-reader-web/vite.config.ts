@@ -4,6 +4,7 @@ import path from 'path';
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/tiny-reader/', // Base path for GitHub Pages deployment
   plugins: [vue()],
   resolve: {
     alias: {
