@@ -2,8 +2,7 @@ name: Build and Release App
 
 on:
   push:
-    tags:
-      - 'v*.*.*'  # Triggers the workflow when a new tag matching this pattern is pushed
+    branches: [main]  # Adjust branch name as needed
   workflow_dispatch: # Allows manual triggering of the workflow
 
 jobs:
