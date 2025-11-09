@@ -192,7 +192,8 @@ const FileLoader = ({ isMobile = false }) => {
   // Load cached data on component mount
   useEffect(() => {
     readerStore.loadFromCache();
-  }, [readerStore]);
+  // eslint-disable-next-line
+  }, []);
 
 
   // 处理键盘事件

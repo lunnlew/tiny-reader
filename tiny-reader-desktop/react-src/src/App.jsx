@@ -23,29 +23,31 @@ function App() {
     if (typeof window !== 'undefined' && typeof window.Neutralino !== 'undefined') {
       initNeutralinoApp();
     }
+  })
 
+  useEffect(() => {
     // Check for mobile
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-    
+
     checkIsMobile();
     window.addEventListener('resize', checkIsMobile);
-    
+
     // Add event listener for menu-triggered file opening
     const handleOpenFileEvent = (event) => {
       if (event.detail && event.detail.file) {
         readerStore.processFile(event.detail.file);
       }
     };
-    
+
     // Add event listener for menu-triggered loading state
     const handleLoadingEvent = (event) => {
       if (event.detail && typeof event.detail.isLoading === 'boolean') {
         readerStore.setIsLoading(event.detail.isLoading);
       }
     };
-    
+
     // Add event listener for menu-triggered settings
     const handleSettingsEvent = () => {
       settingsStore.toggleSettings();
