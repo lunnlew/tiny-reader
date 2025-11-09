@@ -86,18 +86,6 @@ jobs:
         cd tiny-reader-desktop
         npm install -g @neutralinojs/neu
 
-    - name: Configure Neutralino for Production
-      if: steps.environment.outputs.ENVIRONMENT == 'production'
-      run: |
-        cd tiny-reader-desktop
-        sed -i 's/"production": false/"production": true/g' neutralino.config.json
-
-    - name: Configure Neutralino for Staging/Development
-      if: steps.environment.outputs.ENVIRONMENT != 'production'
-      run: |
-        cd tiny-reader-desktop
-        sed -i 's/"production": true/"production": false/g' neutralino.config.json
-
     - name: Build Neutralino app
       run: |
         cd tiny-reader-desktop
